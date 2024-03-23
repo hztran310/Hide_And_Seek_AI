@@ -9,9 +9,9 @@ class Character:
         self.col = 0
         self.tile_size = map.tile_size
         self.win = windows
-        self.move_delay = 60
-        self.last_move = pygame.time.get_ticks()
-
+        self.move_delay = 200
+        self.last_move_time = 0
+        
     def set_position(self):
         for i, row in enumerate(self.map_data):
             for j, col in enumerate(row):
@@ -22,8 +22,18 @@ class Character:
     
     def move(self):
         key = pygame.key.get_pressed()
-        now = pygame.time.get_ticks()
-        if now - self.last_move > self.move_delay:
+        current_key = None
+        
+        if key[pygame.K_UP]:
+            current_key = 'up'
+        elif key[pygame.K_DOWN]:
+            current_key = 'down'
+        elif key[pygame.K_LEFT]:
+            current_key = 'left'
+        elif key[pygame.K_RIGHT]:
+            current_key = 'right'
+            
+        if current_key is not None and (pygame.time.get_ticks() - self.last_move_time) > self.move_delay:
             if key[pygame.K_UP]:
                 if self.row > 0:
                     color = self.win.get_at((self.col * self.tile_size, (self.row - 1) * self.tile_size))
@@ -44,7 +54,7 @@ class Character:
                     color = self.win.get_at(((self.col + 1) * self.tile_size, self.row * self.tile_size))
                     if color == (133, 151, 153, 255):
                         self.col += 1
-            self.last_move = now
+            self.last_move_time = pygame.time.get_ticks()
         
 
     def raycasting(self, unit_range):
