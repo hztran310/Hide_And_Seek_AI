@@ -16,8 +16,8 @@ win = pygame.display.set_mode((WIDTH, HEIGHT))
 m = MAP('Map/Map1.txt', win)
 
 # Create the characters
-seeker = Character(3, m)
-hider = Character(2, m)
+seeker = Character(3, m, win)
+hider = Character(2, m, win)
 
 # Set the initial positions of the characters
 seeker.set_position()
@@ -29,7 +29,7 @@ while running:
     clock.tick(FPS)
     
     # Move the seeker
-    seeker.move(m.map_data)
+    seeker.move()
     
     # Draw the map and the characters
     m.draw()

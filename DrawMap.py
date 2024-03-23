@@ -22,7 +22,7 @@ class MAP:
     def draw(self):
         for i, row in enumerate(self.map_data):
             for j, col in enumerate(row):
-                if col == '0':
+                if col == '0' or col == '2' or col == '3':
                     pygame.draw.rect(self.win, (133, 151, 153), (j*self.tile_size, i*self.tile_size, self.tile_size, self.tile_size))
                 else:
                     pygame.draw.rect(self.win, (252, 250, 245), (j*self.tile_size, i*self.tile_size, self.tile_size, self.tile_size))
