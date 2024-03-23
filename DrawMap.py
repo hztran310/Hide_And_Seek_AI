@@ -1,5 +1,5 @@
 import pygame
-from Character import Player
+
 
 class MAP:
     def __init__(self,filename, windows):
@@ -16,17 +16,16 @@ class MAP:
         self.win = windows
         self.tile_size = min(self.win.get_width() // cols, self.win.get_height() // rows)
 
+    def get_map_data(self):
+        return self.map_data
+
     def draw(self):
         for i, row in enumerate(self.map_data):
             for j, col in enumerate(row):
                 if col == '0':
                     pygame.draw.rect(self.win, (133, 151, 153), (j*self.tile_size, i*self.tile_size, self.tile_size, self.tile_size))
-                elif col == '1':
+                else:
                     pygame.draw.rect(self.win, (252, 250, 245), (j*self.tile_size, i*self.tile_size, self.tile_size, self.tile_size))
-                elif col == '2':
-                    pygame.draw.rect(self.win, (0, 0, 255), (j*self.tile_size, i*self.tile_size, self.tile_size, self.tile_size))
-                elif col == '3':
-                    pygame.draw.rect(self.win, (255, 0, 0), (j*self.tile_size, i*self.tile_size, self.tile_size, self.tile_size))
 
         for i in range(0, len(self.obstacles), 4):
             top = (self.obstacles[i] + 1) * self.tile_size
@@ -37,3 +36,5 @@ class MAP:
             for y in range(top, down, self.tile_size):
                 for x in range(left, right, self.tile_size):
                     pygame.draw.rect(self.win, (255, 255, 0), (x, y, self.tile_size - 2, self.tile_size - 2))
+
+    
