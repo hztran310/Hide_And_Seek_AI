@@ -16,18 +16,24 @@ class Character:
                     self.row = i
                     self.col = j
                     return
+    
 
-    def move(self):
+    def move(self, map_data):
         key = pygame.key.get_pressed()
         if key[pygame.K_UP]:
             if self.row > 0 and self.map_data[self.row - 1][self.col] != '1':
                 self.row -= 1
+                map_data[self.row + 1][self.col] = '0'
         elif key[pygame.K_DOWN]:
             if self.row < len(self.map_data) - 1 and self.map_data[self.row + 1][self.col] != '1':
                 self.row += 1
+                map_data[self.row - 1][self.col] = '0'
         elif key[pygame.K_LEFT]:
             if self.col > 0 and self.map_data[self.row][self.col - 1] != '1':
                 self.col -= 1
+                map_data[self.row][self.col + 1] = '0'
         elif key[pygame.K_RIGHT]:
             if self.col < len(self.map_data[0]) - 1 and self.map_data[self.row][self.col + 1] != '1':
                 self.col += 1
+                map_data[self.row][self.col - 1] = '0'
+        return map_data

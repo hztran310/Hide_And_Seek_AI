@@ -36,5 +36,7 @@ class MAP:
             for y in range(top, down, self.tile_size):
                 for x in range(left, right, self.tile_size):
                     pygame.draw.rect(self.win, (255, 255, 0), (x, y, self.tile_size - 2, self.tile_size - 2))
+                    
+    
 
     
