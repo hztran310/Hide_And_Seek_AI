@@ -13,7 +13,7 @@ FPS = 60
 win = pygame.display.set_mode((WIDTH, HEIGHT))
 
 # Create the map
-m = MAP('Map\\Map1.txt', win)
+m = MAP('Map/Map1.txt', win)
 
 # Create the characters
 seeker = Character(3, m)
@@ -27,10 +27,10 @@ running = True
 clock = pygame.time.Clock()
 while running:
     clock.tick(FPS)
-
+    
     # Move the seeker
-    seeker.move()
-
+    seeker.move(m.map_data)
+    
     # Draw the map and the characters
     m.draw()
     pygame.draw.rect(win, (255, 0, 0), (seeker.col * m.tile_size, seeker.row * m.tile_size, m.tile_size, m.tile_size))
