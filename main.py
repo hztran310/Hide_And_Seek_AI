@@ -12,8 +12,10 @@ FPS = 60
 # Create the display window
 win = pygame.display.set_mode((WIDTH, HEIGHT))
 
+pygame.display.set_caption('Hide & Seek')
+
 # Create the map
-m = MAP('Map/Map1.txt', win)
+m = MAP('Map\\Map1.txt', win)
 
 # Create the characters
 seeker = Character(3, m, win)
@@ -28,11 +30,12 @@ clock = pygame.time.Clock()
 while running:
     clock.tick(FPS)
     
+    m.draw()
     # Move the seeker
     seeker.move()
+    seeker.character_vision(3)
     
     # Draw the map and the characters
-    m.draw()
     pygame.draw.rect(win, (255, 0, 0), (seeker.col * m.tile_size, seeker.row * m.tile_size, m.tile_size, m.tile_size))
     pygame.draw.rect(win, (0, 0, 255), (hider.col * m.tile_size, hider.row * m.tile_size, m.tile_size, m.tile_size))
 
