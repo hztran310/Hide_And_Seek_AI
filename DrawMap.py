@@ -1,12 +1,13 @@
 import pygame
-
+import os
 
 class MAP:
     def __init__(self,filename, windows):
         self.player = None
         self.map_data = []
         self.obstacles = list()
-        with open(filename, 'r') as file:
+        # with open(filename, 'r') as file:
+        with open(os.path.normpath(filename), 'r') as file: # Windows: open(filename, 'r'), to work on macOS
             rows, cols = map(int, file.readline().split()) 
             for _ in range(rows):
                 self.map_data.append(list(file.readline().strip()))

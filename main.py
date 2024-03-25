@@ -15,7 +15,7 @@ win = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption('Hide & Seek')
 
 # Create the map
-m = MAP('Map\\Map1.txt', win)
+m = MAP('Map\\Map1.txt', win) # Windows use \\, macOS use /
 
 # Create the characters
 seeker = Character(3, m, win)
