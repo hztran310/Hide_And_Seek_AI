@@ -45,19 +45,19 @@ while running:
                 seeker.remove_obstacle()
         else:
             seeker.remove_obstacle()
-
     
     # Move the seeker
     if seeker.obstacle is None:
         seeker.move()
     else:
-        seeker.move()
         seeker.move_obstacle()
 
     seeker.character_vision(3)
 
     pygame.draw.rect(win, (255, 0, 0), (seeker.col * m.tile_size, seeker.row * m.tile_size, m.tile_size, m.tile_size))
     pygame.draw.rect(win, (0, 0, 255), (hider.col * m.tile_size, hider.row * m.tile_size, m.tile_size, m.tile_size))
+    
+
     
     SCORE_TEXT = SCORE_FONT.render(f'Score: {seeker.score}', True, (0, 0, 0))  # Create a text surface with the score
     win.blit(SCORE_TEXT, [0,0])    

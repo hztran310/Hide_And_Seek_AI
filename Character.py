@@ -24,11 +24,22 @@ class Character:
                     self.col = j
                     return
                 
+    def reset_map_data(self):
+        for i, row in enumerate(self.map_data):
+            for j, col in enumerate(row):
+                if col == '4' or col == '3':
+                    self.map_data[i][j] = '0'
+
+        if self.obstacle is not None or self.can_pick_obstacle():
+            for i in range(self.obstacle.top, self.obstacle.down + 1):
+                for j in range(self.obstacle.left, self.obstacle.right + 1):
+                    self.map_data[i][j] = '4'
+                
     def move_left(self):
         if self.col > 0:
-            color = self.win.get_at(((self.col - 1) * self.tile_size, self.row * self.tile_size))
+            # color = self.win.get_at(((self.col - 1) * self.tile_size, self.row * self.tile_size))
             # if color == (133, 151, 153, 255):
-            if self.map_data[self.row][self.col - 1] == '0':
+            if self.map_data[self.row][self.col - 1] == '0' or self.map_data[self.row][self.col - 1] == '3':
                 self.col -= 1
 
   
@@ -36,14 +47,14 @@ class Character:
         if self.col < len(self.map_data[0]) - 1:
             # color = self.win.get_at(((self.col + 1) * self.tile_size, self.row * self.tile_size))
             # if color == (133, 151, 153, 255):
-            if self.map_data[self.row][self.col + 1] == '0':
+            if self.map_data[self.row][self.col + 1] == '0' or self.map_data[self.row][self.col + 1] == '3':
                 self.col += 1
                 
     def move_up(self):
         if self.row > 0:
             # color = self.win.get_at((self.col * self.tile_size, (self.row - 1) * self.tile_size))
             # if color == (133, 151, 153, 255):
-            if self.map_data[self.row - 1][self.col] == '0':
+            if self.map_data[self.row - 1][self.col] == '0' or self.map_data[self.row - 1][self.col] == '3':
                 self.row -= 1
 
     
@@ -51,7 +62,7 @@ class Character:
         if self.row < len(self.map_data) - 1:
             # color = self.win.get_at((self.col * self.tile_size, (self.row + 1) * self.tile_size))
             # if color == (133, 151, 153, 255):
-            if self.map_data[self.row + 1][self.col] == '0':
+            if self.map_data[self.row + 1][self.col] == '0' or self.map_data[self.row + 1][self.col]== '3':
                 self.row += 1
 
     def move_up_left(self):
@@ -142,20 +153,33 @@ class Character:
             self.obstacle = None
 
     def move_obstacle(self):
-        if (pygame.time.get_ticks() - self.last_move_time) > self.move_delay / 3:
+        if (pygame.time.get_ticks() - self.last_move_time) > self.move_delay / 2.5:
             key = pygame.key.get_pressed()
             if key[pygame.K_UP]:
+                if self.row == 0:
+                    return
                 self.obstacle.move_up()
+                self.reset_map_data()
                 self.move_up()
             elif key[pygame.K_DOWN]:
+                if self.row == len(self.map_data) - 1:
+                    return
                 self.obstacle.move_down()
+                self.reset_map_data()
                 self.move_down()
             elif key[pygame.K_LEFT]:
+                if self.col == 0:
+                    return
                 self.obstacle.move_left()
+                self.reset_map_data()
                 self.move_left()
             elif key[pygame.K_RIGHT]:
+                if self.col == len(self.map_data[0]) - 1:
+                    return
                 self.obstacle.move_right()
+                self.reset_map_data()
                 self.move_right()
+            
             self.last_move_time = pygame.time.get_ticks()
     
     def character_vision(self, vision_range):
