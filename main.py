@@ -2,6 +2,7 @@ import pygame
 from DrawMap import MAP
 from Character import Character, Seeker
 from setting import *
+from Obstacle import Obstacle
     
 # Initialize Pygame
 pygame.init()
@@ -24,13 +25,24 @@ hider.set_position()
 
 running = True
 clock = pygame.time.Clock()
+list_obstacles = m.get_obstacles()
+obstacles = []
+for i in range(0, len(list_obstacles), 4):
+    obs = Obstacle(list_obstacles[i], list_obstacles[i+1], list_obstacles[i+2], list_obstacles[i+3], m, win)
+    obstacles.append(obs)
 
 while running:
     clock.tick(FPS)
-    
     m.draw()
+    
+    for obs in obstacles:
+        obs.draw()
+        if seeker.can_pick_obstacle():
+            seeker.set_obstacle(obs)
+    
     # Move the seeker
     seeker.move()
+    seeker.move_obstacle()
     seeker.character_vision(3)
     
     SCORE_TEXT = SCORE_FONT.render(f'Score: {seeker.score}', True, (0, 0, 0))  # Create a text surface with the score
