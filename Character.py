@@ -1,5 +1,6 @@
 import pygame
 from DrawMap import MAP
+from Obstacle import Obstacle
 import numpy as np
 import random
 
@@ -14,6 +15,7 @@ class Character:
         self.move_delay = 200
         self.last_move_time = 0
         self.visible_cells = None
+        self.obstacle = None
         
     def set_position(self):
         for i, row in enumerate(self.map_data):
@@ -22,30 +24,48 @@ class Character:
                     self.row = i
                     self.col = j
                     return
+                
+    def reset_map_data(self):
+        for i, row in enumerate(self.map_data):
+            for j, col in enumerate(row):
+                if col == '4' or col == '3':
+                    self.map_data[i][j] = '0'
+
+        if self.obstacle is not None or self.can_pick_obstacle():
+            for i in range(self.obstacle.top, self.obstacle.down + 1):
+                for j in range(self.obstacle.left, self.obstacle.right + 1):
+                    self.map_data[i][j] = '4'
+                
     def move_left(self):
         if self.col > 0:
-            color = self.win.get_at(((self.col - 1) * self.tile_size, self.row * self.tile_size))
-            if color == (133, 151, 153, 255):
+            # color = self.win.get_at(((self.col - 1) * self.tile_size, self.row * self.tile_size))
+            # if color == (133, 151, 153, 255):
+            if self.map_data[self.row][self.col - 1] == '0' or self.map_data[self.row][self.col - 1] == '3':
                 self.col -= 1
-                
+
+  
     def move_right(self):
         if self.col < len(self.map_data[0]) - 1:
-            color = self.win.get_at(((self.col + 1) * self.tile_size, self.row * self.tile_size))
-            if color == (133, 151, 153, 255):
+            # color = self.win.get_at(((self.col + 1) * self.tile_size, self.row * self.tile_size))
+            # if color == (133, 151, 153, 255):
+            if self.map_data[self.row][self.col + 1] == '0' or self.map_data[self.row][self.col + 1] == '3':
                 self.col += 1
                 
     def move_up(self):
         if self.row > 0:
-            color = self.win.get_at((self.col * self.tile_size, (self.row - 1) * self.tile_size))
-            if color == (133, 151, 153, 255):
+            # color = self.win.get_at((self.col * self.tile_size, (self.row - 1) * self.tile_size))
+            # if color == (133, 151, 153, 255):
+            if self.map_data[self.row - 1][self.col] == '0' or self.map_data[self.row - 1][self.col] == '3':
                 self.row -= 1
+
     
     def move_down(self):
         if self.row < len(self.map_data) - 1:
-            color = self.win.get_at((self.col * self.tile_size, (self.row + 1) * self.tile_size))
-            if color == (133, 151, 153, 255):
+            # color = self.win.get_at((self.col * self.tile_size, (self.row + 1) * self.tile_size))
+            # if color == (133, 151, 153, 255):
+            if self.map_data[self.row + 1][self.col] == '0' or self.map_data[self.row + 1][self.col]== '3':
                 self.row += 1
-    
+
     def move_up_left(self):
         if self.row > 0 and self.col > 0:
             color = self.win.get_at(((self.col - 1) * self.tile_size, (self.row - 1) * self.tile_size))
@@ -113,6 +133,55 @@ class Character:
             elif key[pygame.K_c]:
                 self.move_down_right()
             self.last_move_time = pygame.time.get_ticks()
+
+    def can_pick_obstacle(self):
+        for direction in [(0, -1), (-1, 0), (0, 1), (1, 0), (-1, -1), (-1, 1), (1, -1), (1, 1)]:
+            row = self.row + direction[0]
+            col = self.col + direction[1]
+            if row >= 0 and row < len(self.map_data) and col >= 0 and col < len(self.map_data[0]):
+                color = self.win.get_at((col * self.tile_size, row * self.tile_size))
+                if color == (255, 255, 0, 255):
+                    self.obstacle 
+                    return True
+        return False
+
+    def set_obstacle(self, obstacle):
+        if self.can_pick_obstacle():
+            self.obstacle = obstacle
+
+    def remove_obstacle(self):
+        if self.obstacle is not None:
+            self.obstacle = None
+
+    def move_obstacle(self):
+        if (pygame.time.get_ticks() - self.last_move_time) > self.move_delay / 2.5:
+            key = pygame.key.get_pressed()
+            if key[pygame.K_UP]:
+                if self.row == 0:
+                    return
+                self.obstacle.move_up()
+                self.reset_map_data()
+                self.move_up()
+            elif key[pygame.K_DOWN]:
+                if self.row == len(self.map_data) - 1:
+                    return
+                self.obstacle.move_down()
+                self.reset_map_data()
+                self.move_down()
+            elif key[pygame.K_LEFT]:
+                if self.col == 0:
+                    return
+                self.obstacle.move_left()
+                self.reset_map_data()
+                self.move_left()
+            elif key[pygame.K_RIGHT]:
+                if self.col == len(self.map_data[0]) - 1:
+                    return
+                self.obstacle.move_right()
+                self.reset_map_data()
+                self.move_right()
+            
+            self.last_move_time = pygame.time.get_ticks()
     
     def character_vision(self, vision_range):
         grid_size = len(self.map_data)
@@ -135,7 +204,7 @@ class Character:
 
         self.visible_cells[x, y] = False
 
-        # return self.visible_cells
+        return self.visible_cells
     
     def has_line_of_sight(self, start, end):
         points = self.bresenham(start, end)
