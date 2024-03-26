@@ -2,6 +2,7 @@ import pygame
 from DrawMap import MAP
 from Obstacle import Obstacle
 import numpy as np
+import random
 
 class Character:
     def __init__(self, character_type, map, windows):
@@ -105,9 +106,9 @@ class Character:
             current_key = 'left'
         elif key[pygame.K_RIGHT]:
             current_key = 'right'
-        elif key[pygame.K_w]:
-            current_key = 'up_right'
         elif key[pygame.K_e]:
+            current_key = 'up_right'
+        elif key[pygame.K_q]:
             current_key = 'up_left'
         elif key[pygame.K_z]:
             current_key = 'down_left'
@@ -123,9 +124,9 @@ class Character:
                 self.move_left()
             elif key[pygame.K_RIGHT]:
                 self.move_right()
-            elif key[pygame.K_w]:
-                self.move_up_right()
             elif key[pygame.K_e]:
+                self.move_up_right()
+            elif key[pygame.K_q]:
                 self.move_up_left()
             elif key[pygame.K_z]:
                 self.move_down_left()
@@ -248,6 +249,8 @@ class Seeker(Character):
     def __init__(self, map, windows):
         super().__init__(3, map, windows)
         self.score = 0
+        self.hider_position = []
+        self.move_count = 0
     
     def found_hider(self, hider):
         if self.row == hider.row and self.col == hider.col:
@@ -260,3 +263,33 @@ class Seeker(Character):
         super().move()
         if (self.row, self.col) != previous_position:  # Check if the position changed
             self.score -= 1
+            self.move_count += 1
+    
+    def get_hider_postion(self, hider_position):
+        self.hider_position.clear()
+        self.hider_position.append(hider_position)
+        
+class Hider(Character):
+    def __init__(self, map, windows):
+        super().__init__(2, map, windows)
+    
+    def move(self):
+        pass
+    
+    def annouce_location(self, unit_range):
+        grid_size = len(self.map_data)
+        
+        left_limit = max(0, self.row - unit_range)
+        right_limit = min(grid_size, self.row + unit_range + 1)
+        top_limit = max(0, self.col - unit_range)
+        bottom_limit = min(grid_size, self.col + unit_range + 1)
+
+        randomList = []
+        
+        for i in range (left_limit, right_limit):
+            for j in range(top_limit, bottom_limit):
+                randomList.append((i, j))
+        
+        return random.choice(randomList)
+                
+        
