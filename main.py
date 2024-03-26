@@ -1,21 +1,10 @@
 import pygame
 from DrawMap import MAP
 from Character import Character, Seeker
-from multiprocessing import Process
-from tkinter import Tk, messagebox
-
-def show_message():
-    root = Tk()
-    root.withdraw()
-    messagebox.showinfo("Game Notification", "Hider found!")
-    root.destroy()
+from setting import *
     
 # Initialize Pygame
 pygame.init()
-
-# Set up some constants
-WIDTH, HEIGHT = 800, 800
-FPS = 60
 
 # Create the display window
 win = pygame.display.set_mode((WIDTH, HEIGHT))
@@ -26,7 +15,6 @@ pygame.display.set_caption('Hide & Seek')
 m = MAP('Map/Map1.txt', win)
 
 # Create the characters
-# seeker = Character(3, m, win)
 seeker = Seeker(m, win)
 hider = Character(2, m, win)
 
@@ -37,10 +25,6 @@ hider.set_position()
 running = True
 clock = pygame.time.Clock()
 
-font = pygame.font.Font(None, 36)  # Create a font object
-text = font.render('Hider found!', True, (0, 0, 0))  # Create a text surface
-text_rect = text.get_rect(center=(WIDTH // 2, HEIGHT // 2))  # Get the rectangle around the text and center it
-
 while running:
     clock.tick(FPS)
     
@@ -48,6 +32,9 @@ while running:
     # Move the seeker
     seeker.move()
     seeker.character_vision(3)
+    
+    SCORE_TEXT = SCORE_FONT.render(f'Score: {seeker.score}', True, (0, 0, 0))  # Create a text surface with the score
+    win.blit(SCORE_TEXT, [0,0])
     
     # Draw the map and the characters
     pygame.draw.rect(win, (255, 0, 0), (seeker.col * m.tile_size, seeker.row * m.tile_size, m.tile_size, m.tile_size))
@@ -57,7 +44,11 @@ while running:
     pygame.display.update()
     
     if seeker.found_hider(hider):
-        win.blit(text, text_rect.topleft)  # Draw the text at the calculated position
+        win.fill((133, 151, 153), pygame.Rect(0, 0, SCORE_TEXT.get_width(), SCORE_TEXT.get_height()))  # Fill the area with white color
+        pygame.display.update()
+        SCORE_TEXT = SCORE_FONT.render(f'Score: {seeker.score}', True, (0, 0, 0))  # Create a text surface with the score
+        win.blit(SCORE_TEXT, [0,0])
+        win.blit(TEXT_HIDER_FOUND, TEXT_REC.topleft)  # Draw the text at the calculated position
         pygame.display.update()
         pygame.time.wait(3000)  # Wait for 3 seconds
         break
@@ -65,5 +56,6 @@ while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
+
 
 pygame.quit()

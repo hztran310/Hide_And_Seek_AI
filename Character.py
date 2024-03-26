@@ -21,6 +21,57 @@ class Character:
                     self.row = i
                     self.col = j
                     return
+    def move_left(self):
+        if self.col > 0:
+            color = self.win.get_at(((self.col - 1) * self.tile_size, self.row * self.tile_size))
+            if color == (133, 151, 153, 255):
+                self.col -= 1
+                
+    def move_right(self):
+        if self.col < len(self.map_data[0]) - 1:
+            color = self.win.get_at(((self.col + 1) * self.tile_size, self.row * self.tile_size))
+            if color == (133, 151, 153, 255):
+                self.col += 1
+                
+    def move_up(self):
+        if self.row > 0:
+            color = self.win.get_at((self.col * self.tile_size, (self.row - 1) * self.tile_size))
+            if color == (133, 151, 153, 255):
+                self.row -= 1
+    
+    def move_down(self):
+        if self.row < len(self.map_data) - 1:
+            color = self.win.get_at((self.col * self.tile_size, (self.row + 1) * self.tile_size))
+            if color == (133, 151, 153, 255):
+                self.row += 1
+    
+    def move_up_left(self):
+        if self.row > 0 and self.col > 0:
+            color = self.win.get_at(((self.col - 1) * self.tile_size, (self.row - 1) * self.tile_size))
+            if color == (133, 151, 153, 255):
+                self.row -= 1
+                self.col -= 1
+    
+    def move_up_right(self):
+        if self.row > 0 and self.col < len(self.map_data[0]) - 1:
+            color = self.win.get_at(((self.col + 1) * self.tile_size, (self.row - 1) * self.tile_size))
+            if color == (133, 151, 153, 255):
+                self.row -= 1
+                self.col += 1
+                
+    def move_down_left(self):
+        if self.row < len(self.map_data) - 1 and self.col > 0:
+            color = self.win.get_at(((self.col - 1) * self.tile_size, (self.row + 1) * self.tile_size))
+            if color == (133, 151, 153, 255):
+                self.row += 1
+                self.col -= 1
+                
+    def move_down_right(self):
+        if self.row < len(self.map_data) - 1 and self.col < len(self.map_data[0]) - 1:
+            color = self.win.get_at(((self.col + 1) * self.tile_size, (self.row + 1) * self.tile_size))
+            if color == (133, 151, 153, 255):
+                self.row += 1
+                self.col += 1
     
     def move(self):
         key = pygame.key.get_pressed()
@@ -34,28 +85,32 @@ class Character:
             current_key = 'left'
         elif key[pygame.K_RIGHT]:
             current_key = 'right'
+        elif key[pygame.K_w]:
+            current_key = 'up_right'
+        elif key[pygame.K_e]:
+            current_key = 'up_left'
+        elif key[pygame.K_z]:
+            current_key = 'down_left'
+        elif key[pygame.K_c]:
+            current_key = 'down_right'
             
         if current_key is not None and (pygame.time.get_ticks() - self.last_move_time) > self.move_delay:
             if key[pygame.K_UP]:
-                if self.row > 0:
-                    color = self.win.get_at((self.col * self.tile_size, (self.row - 1) * self.tile_size))
-                    if color == (133, 151, 153, 255):
-                        self.row -= 1
+                self.move_up()
             elif key[pygame.K_DOWN]:
-                if self.row < len(self.map_data) - 1:
-                    color = self.win.get_at((self.col * self.tile_size, (self.row + 1) * self.tile_size))
-                    if color == (133, 151, 153, 255):
-                        self.row += 1
+                self.move_down()
             elif key[pygame.K_LEFT]:
-                if self.col > 0:
-                    color = self.win.get_at(((self.col - 1) * self.tile_size, self.row * self.tile_size))
-                    if color == (133, 151, 153, 255):
-                        self.col -= 1
+                self.move_left()
             elif key[pygame.K_RIGHT]:
-                if self.col < len(self.map_data[0]) - 1:
-                    color = self.win.get_at(((self.col + 1) * self.tile_size, self.row * self.tile_size))
-                    if color == (133, 151, 153, 255):
-                        self.col += 1
+                self.move_right()
+            elif key[pygame.K_w]:
+                self.move_up_right()
+            elif key[pygame.K_e]:
+                self.move_up_left()
+            elif key[pygame.K_z]:
+                self.move_down_left()
+            elif key[pygame.K_c]:
+                self.move_down_right()
             self.last_move_time = pygame.time.get_ticks()
     
     def character_vision(self, vision_range):
@@ -123,20 +178,16 @@ class Character:
 class Seeker(Character):
     def __init__(self, map, windows):
         super().__init__(3, map, windows)
+        self.score = 0
     
     def found_hider(self, hider):
         if self.row == hider.row and self.col == hider.col:
+            self.score += 20
             return True
         return False
     
-        
-                            
-                    
-
-        
-
-
-        
-        
-                    
-                
+    def move(self):
+        previous_position = (self.row, self.col)  # Store the previous position
+        super().move()
+        if (self.row, self.col) != previous_position:  # Check if the position changed
+            self.score -= 1
