@@ -85,9 +85,9 @@ class Character:
             current_key = 'left'
         elif key[pygame.K_RIGHT]:
             current_key = 'right'
-        elif key[pygame.K_w]:
-            current_key = 'up_right'
         elif key[pygame.K_e]:
+            current_key = 'up_right'
+        elif key[pygame.K_q]:
             current_key = 'up_left'
         elif key[pygame.K_z]:
             current_key = 'down_left'
@@ -103,9 +103,9 @@ class Character:
                 self.move_left()
             elif key[pygame.K_RIGHT]:
                 self.move_right()
-            elif key[pygame.K_w]:
-                self.move_up_right()
             elif key[pygame.K_e]:
+                self.move_up_right()
+            elif key[pygame.K_q]:
                 self.move_up_left()
             elif key[pygame.K_z]:
                 self.move_down_left()
