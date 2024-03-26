@@ -11,7 +11,6 @@ class Obstacle:
         self.win = windows
         self.map_data = map.get_map_data()
 
-    
     def draw(self):
         top = self.top * self.tile_size
         left = self.left * self.tile_size

@@ -27,31 +27,33 @@ class Character:
     def move_left(self):
         if self.col > 0:
             color = self.win.get_at(((self.col - 1) * self.tile_size, self.row * self.tile_size))
-            if color == (133, 151, 153, 255):
+            # if color == (133, 151, 153, 255):
+            if self.map_data[self.row][self.col - 1] == '0':
                 self.col -= 1
 
-                
+  
     def move_right(self):
         if self.col < len(self.map_data[0]) - 1:
-            color = self.win.get_at(((self.col + 1) * self.tile_size, self.row * self.tile_size))
-            if color == (133, 151, 153, 255):
+            # color = self.win.get_at(((self.col + 1) * self.tile_size, self.row * self.tile_size))
+            # if color == (133, 151, 153, 255):
+            if self.map_data[self.row][self.col + 1] == '0':
                 self.col += 1
-
                 
     def move_up(self):
         if self.row > 0:
-            color = self.win.get_at((self.col * self.tile_size, (self.row - 1) * self.tile_size))
-            if color == (133, 151, 153, 255):
+            # color = self.win.get_at((self.col * self.tile_size, (self.row - 1) * self.tile_size))
+            # if color == (133, 151, 153, 255):
+            if self.map_data[self.row - 1][self.col] == '0':
                 self.row -= 1
 
     
     def move_down(self):
         if self.row < len(self.map_data) - 1:
-            color = self.win.get_at((self.col * self.tile_size, (self.row + 1) * self.tile_size))
-            if color == (133, 151, 153, 255):
+            # color = self.win.get_at((self.col * self.tile_size, (self.row + 1) * self.tile_size))
+            # if color == (133, 151, 153, 255):
+            if self.map_data[self.row + 1][self.col] == '0':
                 self.row += 1
 
-    
     def move_up_left(self):
         if self.row > 0 and self.col > 0:
             color = self.win.get_at(((self.col - 1) * self.tile_size, (self.row - 1) * self.tile_size))
@@ -127,9 +129,9 @@ class Character:
             if row >= 0 and row < len(self.map_data) and col >= 0 and col < len(self.map_data[0]):
                 color = self.win.get_at((col * self.tile_size, row * self.tile_size))
                 if color == (255, 255, 0, 255):
+                    self.obstacle 
                     return True
         return False
-
 
     def set_obstacle(self, obstacle):
         if self.can_pick_obstacle():
@@ -155,8 +157,6 @@ class Character:
                 self.obstacle.move_right()
                 self.move_right()
             self.last_move_time = pygame.time.get_ticks()
-        
-
     
     def character_vision(self, vision_range):
         grid_size = len(self.map_data)
