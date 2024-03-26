@@ -10,8 +10,9 @@ class Character:
         self.col = 0
         self.tile_size = map.tile_size
         self.win = windows
-        self.move_delay = 90
+        self.move_delay = 200
         self.last_move_time = 0
+        self.visible_cells = None
         
     def set_position(self):
         for i, row in enumerate(self.map_data):
@@ -59,7 +60,7 @@ class Character:
     
     def character_vision(self, vision_range):
         grid_size = len(self.map_data)
-        visible_cells = np.zeros((grid_size, grid_size), dtype=bool)
+        self.visible_cells = np.zeros((grid_size, grid_size), dtype=bool)
 
         x, y = self.row, self.col
 
@@ -73,12 +74,12 @@ class Character:
                 color = self.win.get_at((new_y * self.tile_size, new_x * self.tile_size))
                 if not (new_x == x and new_y == y) and color != (252, 250, 245, 255) and color != (255, 255, 0, 255):
                     if self.has_line_of_sight((x, y), (new_x, new_y)):
-                        visible_cells[new_x, new_y] = True
+                        self.visible_cells[new_x, new_y] = True
                         pygame.draw.rect(self.win,(248, 145, 150), (new_y * self.tile_size, new_x * self.tile_size, self.tile_size, self.tile_size))
 
-        visible_cells[x, y] = False
+        self.visible_cells[x, y] = False
 
-        return visible_cells
+        # return self.visible_cells
     
     def has_line_of_sight(self, start, end):
         points = self.bresenham(start, end)
@@ -110,8 +111,7 @@ class Character:
         D = 2*dy - dx
         y = 0
         result = []
-        for x in range(dx + 1):
-            
+        for x in range(dx):
             result.append(np.array([x0 + x * xx + y * yx, y0 + x * xy + y * yy], dtype=np.uint8))
 
             if D >= 0:
@@ -120,7 +120,15 @@ class Character:
             D += 2*dy 
         return np.array(result, dtype=np.uint8)
 
-
+class Seeker(Character):
+    def __init__(self, map, windows):
+        super().__init__(3, map, windows)
+    
+    def found_hider(self, hider):
+        if self.row == hider.row and self.col == hider.col:
+            return True
+        return False
+    
         
                             
                     
