@@ -134,18 +134,28 @@ class Character:
     def set_obstacle(self, obstacle):
         if self.can_pick_obstacle():
             self.obstacle = obstacle
-                
-    def move_obstacle(self):
+
+    def remove_obstacle(self):
         if self.obstacle is not None:
+            self.obstacle = None
+
+    def move_obstacle(self):
+        if (pygame.time.get_ticks() - self.last_move_time) > self.move_delay / 3:
             key = pygame.key.get_pressed()
             if key[pygame.K_UP]:
                 self.obstacle.move_up()
+                self.move_up()
             elif key[pygame.K_DOWN]:
                 self.obstacle.move_down()
+                self.move_down()
             elif key[pygame.K_LEFT]:
                 self.obstacle.move_left()
+                self.move_left()
             elif key[pygame.K_RIGHT]:
                 self.obstacle.move_right()
+                self.move_right()
+            self.last_move_time = pygame.time.get_ticks()
+        
 
     
     def character_vision(self, vision_range):
