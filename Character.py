@@ -212,7 +212,7 @@ class Character:
         for point in points:
             x, y = point
             color = self.win.get_at((y * self.tile_size, x * self.tile_size))
-            if color == (252, 250, 245, 255) or color == (255, 255, 0,255):  # If the point is a wall, return False
+            if color == (252, 250, 245, 255):  # If the point is a wall, return False
                 return False
         return True
     

@@ -2,7 +2,7 @@ import pygame
 
 pygame.init()
 
-WIDTH, HEIGHT = 800, 800
+WIDTH, HEIGHT = 800, 640
 FPS = 60
 
 FONT = pygame.font.Font(None, 36)  # Create a font object
