@@ -40,7 +40,7 @@ class Character:
         if self.col > 0:
             # color = self.win.get_at(((self.col - 1) * self.tile_size, self.row * self.tile_size))
             # if color == (133, 151, 153, 255):
-            if self.map_data[self.row][self.col - 1] == '0' or self.map_data[self.row][self.col - 1] == '3':
+            if self.map_data[self.row][self.col - 1] == '0' or self.map_data[self.row][self.col - 1] == '3' or self.map_data[self.row][self.col - 1] == '2':
                 self.col -= 1
 
   
@@ -48,14 +48,14 @@ class Character:
         if self.col < len(self.map_data[0]) - 1:
             # color = self.win.get_at(((self.col + 1) * self.tile_size, self.row * self.tile_size))
             # if color == (133, 151, 153, 255):
-            if self.map_data[self.row][self.col + 1] == '0' or self.map_data[self.row][self.col + 1] == '3':
+            if self.map_data[self.row][self.col + 1] == '0' or self.map_data[self.row][self.col + 1] == '3' or self.map_data[self.row][self.col + 1] == '2':
                 self.col += 1
                 
     def move_up(self):
         if self.row > 0:
             # color = self.win.get_at((self.col * self.tile_size, (self.row - 1) * self.tile_size))
             # if color == (133, 151, 153, 255):
-            if self.map_data[self.row - 1][self.col] == '0' or self.map_data[self.row - 1][self.col] == '3':
+            if self.map_data[self.row - 1][self.col] == '0' or self.map_data[self.row - 1][self.col] == '3' or self.map_data[self.row - 1][self.col] == '2':
                 self.row -= 1
 
     
@@ -63,7 +63,7 @@ class Character:
         if self.row < len(self.map_data) - 1:
             color = self.win.get_at((self.col * self.tile_size, (self.row + 1) * self.tile_size))
             # if color == (133, 151, 153, 255):
-            if self.map_data[self.row + 1][self.col] == '0' or self.map_data[self.row + 1][self.col]== '3':
+            if self.map_data[self.row + 1][self.col] == '0' or self.map_data[self.row + 1][self.col]== '3' or self.map_data[self.row + 1][self.col] == '2':
                 self.row += 1
 
     def move_up_left(self):
