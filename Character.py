@@ -134,8 +134,6 @@ class Character:
                 self.move_down_right()
             self.last_move_time = pygame.time.get_ticks()
 
-
-
     def can_pick_obstacle(self):
         for direction in [(0, -1), (-1, 0), (0, 1), (1, 0), (-1, -1), (-1, 1), (1, -1), (1, 1)]:
             row = self.row + direction[0]
@@ -259,13 +257,54 @@ class Seeker(Character):
             return True
         return False
     
-    def move(self):
-        previous_position = (self.row, self.col)  # Store the previous position
-        super().move()
-        if (self.row, self.col) != previous_position:  # Check if the position changed
-            self.score -= 1
-            self.move_count += 1
+    def move_up(self):
+        super().move_up()
+        self.score -= 1
+        self.move_count += 1
+        print(self.move_count)
+        
+    def move_down(self):
+        super().move_down()
+        self.score -= 1
+        self.move_count += 1
+        print(self.move_count)
     
+    def move_left(self):
+        super().move_left()
+        self.score -= 1
+        self.move_count += 1
+        print(self.move_count)
+
+    def move_right(self):
+        super().move_right()
+        self.score -= 1
+        self.move_count += 1
+        print(self.move_count)
+
+    def move_up_left(self):
+        super().move_up_left()
+        self.score -= 1
+        self.move_count += 1
+        print(self.move_count)
+   
+    def move_up_right(self):
+        super().move_up_right()
+        self.score -= 1
+        self.move_count += 1
+        print(self.move_count)
+    
+    def move_down_left(self):
+        super().move_down_left()
+        self.score -= 1
+        self.move_count += 1
+        print(self.move_count)
+    
+    def move_down_right(self):
+        super().move_down_right()
+        self.score -= 1
+        self.move_count += 1
+        print(self.move_count)
+     
     def get_hider_postion(self, hider_position):
         self.hider_position.clear()
         self.hider_position.append(hider_position)

@@ -15,11 +15,10 @@ win = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption('Hide & Seek')
 
 # Create the map
-m = MAP('Map\\Map1.txt', win)
+m = MAP('Map/Map1.txt', win)
 
 # Create the characters
 seeker = Seeker(m, win)
-# hider = Character(2, m, win)
 hider = Hider(m, win)
 num_hiders = 1
 
@@ -38,23 +37,14 @@ for i in range(0, len(list_obstacles), 4):
     obs = Obstacle(list_obstacles[i], list_obstacles[i+1], list_obstacles[i+2], list_obstacles[i+3], m, win)
     obstacles.append(obs)
 
-
 list = [5, 6, 7, 8, 9, 10]
 random_move = random.choice(list)
-
-list_obstacles = m.get_obstacles()
-obstacles = []
-for i in range(0, len(list_obstacles), 4):
-    obs = Obstacle(list_obstacles[i], list_obstacles[i+1], list_obstacles[i+2], list_obstacles[i+3], m, win)
-    obstacles.append(obs)
 
 while running:
     clock.tick(FPS)
     win.fill((50, 133, 168))
         
     m.draw()
-    seeker.character_vision(3)
-    pygame.draw.rect(win, (0, 0, 255), (hider.col * m.tile_size, hider.row * m.tile_size, m.tile_size, m.tile_size))
 
     for obs in obstacles:
         obs.draw()
@@ -73,14 +63,20 @@ while running:
         
     if seeker.obstacle is None:
         seeker.move()
+        seeker.character_vision(3)
     else:
+        seeker.obstacle.remove_draw()
         seeker.move_obstacle()
+        seeker.obstacle.draw()
+        seeker.character_vision(3)
 
     pygame.draw.rect(win, (255, 0, 0), (seeker.col * m.tile_size, seeker.row * m.tile_size, m.tile_size, m.tile_size))
 
     SCORE_TEXT = SCORE_FONT.render(f'Score: {seeker.score}', True, (0, 0, 0))  # Create a text surface with the score
-    win.blit(SCORE_TEXT, [0,0])    
-
+    win.blit(SCORE_TEXT, [0,0])   
+    
+    pygame.draw.rect(win, (0, 0, 255), (hider.col * m.tile_size, hider.row * m.tile_size, m.tile_size, m.tile_size))
+    
     # Update the display
     pygame.display.update()
     
@@ -94,6 +90,7 @@ while running:
         pygame.time.wait(3000)  # Wait for 3 seconds
         break
     
+
     if seeker.move_count == random_move:
         random_move = random.choice(list)
         hider_location = []
