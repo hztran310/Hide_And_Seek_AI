@@ -31,15 +31,6 @@ class MAP:
                 else:
                     pygame.draw.rect(self.win, (252, 250, 245), (j*self.tile_size, i*self.tile_size, self.tile_size, self.tile_size))
 
-        # for i in range(0, len(self.obstacles), 4):
-        #     top = (self.obstacles[i] + 1) * self.tile_size
-        #     left = (self.obstacles[i+1] + 1) * self.tile_size
-        #     down = self.obstacles[i+2] * self.tile_size
-        #     right = self.obstacles[i+3] * self.tile_size
-
-        #     for y in range(top, down, self.tile_size):
-        #         for x in range(left, right, self.tile_size):
-        #             pygame.draw.rect(self.win, (255, 255, 0), (x, y, self.tile_size - 2, self.tile_size - 2))
                     
     
 

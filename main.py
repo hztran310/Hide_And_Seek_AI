@@ -52,10 +52,14 @@ while running:
     clock.tick(FPS)
         
     m.draw()
-    
+
     for obs in obstacles:
         obs.draw()
         if seeker.can_pick_obstacle():
+            if seeker.obstacle is None:
+                seeker.set_obstacle(obs)
+                seeker.reset_map_data()
+                seeker.remove_obstacle()
             key = pygame.key.get_pressed()
             if key[pygame.K_g]:
                 seeker.set_obstacle(obs)
@@ -69,12 +73,11 @@ while running:
         seeker.move()
     else:
         seeker.move_obstacle()
-
     seeker.character_vision(3)
 
     pygame.draw.rect(win, (255, 0, 0), (seeker.col * m.tile_size, seeker.row * m.tile_size, m.tile_size, m.tile_size))
     pygame.draw.rect(win, (0, 0, 255), (hider.col * m.tile_size, hider.row * m.tile_size, m.tile_size, m.tile_size))
-    
+
 
     
     SCORE_TEXT = SCORE_FONT.render(f'Score: {seeker.score}', True, (0, 0, 0))  # Create a text surface with the score

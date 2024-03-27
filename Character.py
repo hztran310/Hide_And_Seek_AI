@@ -61,7 +61,7 @@ class Character:
     
     def move_down(self):
         if self.row < len(self.map_data) - 1:
-            # color = self.win.get_at((self.col * self.tile_size, (self.row + 1) * self.tile_size))
+            color = self.win.get_at((self.col * self.tile_size, (self.row + 1) * self.tile_size))
             # if color == (133, 151, 153, 255):
             if self.map_data[self.row + 1][self.col] == '0' or self.map_data[self.row + 1][self.col]== '3':
                 self.row += 1
@@ -134,6 +134,8 @@ class Character:
                 self.move_down_right()
             self.last_move_time = pygame.time.get_ticks()
 
+
+
     def can_pick_obstacle(self):
         for direction in [(0, -1), (-1, 0), (0, 1), (1, 0), (-1, -1), (-1, 1), (1, -1), (1, 1)]:
             row = self.row + direction[0]
@@ -141,7 +143,6 @@ class Character:
             if row >= 0 and row < len(self.map_data) and col >= 0 and col < len(self.map_data[0]):
                 color = self.win.get_at((col * self.tile_size, row * self.tile_size))
                 if color == (255, 255, 0, 255):
-                    self.obstacle 
                     return True
         return False
 
@@ -154,28 +155,28 @@ class Character:
             self.obstacle = None
 
     def move_obstacle(self):
-        if (pygame.time.get_ticks() - self.last_move_time) > self.move_delay / 2.5:
+        if (pygame.time.get_ticks() - self.last_move_time) > self.move_delay / 2:
             key = pygame.key.get_pressed()
             if key[pygame.K_UP]:
-                if self.row == 0:
+                if self.row == 0 or self.map_data[self.row - 1][self.col] == '1':
                     return
                 self.obstacle.move_up()
                 self.reset_map_data()
                 self.move_up()
             elif key[pygame.K_DOWN]:
-                if self.row == len(self.map_data) - 1:
+                if self.row == len(self.map_data) - 1 or self.map_data[self.row + 1][self.col] == '1':
                     return
                 self.obstacle.move_down()
                 self.reset_map_data()
                 self.move_down()
             elif key[pygame.K_LEFT]:
-                if self.col == 0:
+                if self.col == 0 or self.map_data[self.row][self.col - 1] == '1':
                     return
                 self.obstacle.move_left()
                 self.reset_map_data()
                 self.move_left()
             elif key[pygame.K_RIGHT]:
-                if self.col == len(self.map_data[0]) - 1:
+                if self.col == len(self.map_data[0]) - 1 or self.map_data[self.row][self.col + 1] == '1':
                     return
                 self.obstacle.move_right()
                 self.reset_map_data()
