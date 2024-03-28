@@ -43,23 +43,35 @@ class Character:
         if self.col > 0:
             if self.map_data[self.row][self.col - 1] == '0' or self.map_data[self.row][self.col - 1] == '3' or self.map_data[self.row][self.col - 1] == '2':
                 self.col -= 1
+                return True
+            else:
+                return False
 
   
     def move_right(self):
         if self.col < len(self.map_data[0]) - 1:
             if self.map_data[self.row][self.col + 1] == '0' or self.map_data[self.row][self.col + 1] == '3' or self.map_data[self.row][self.col + 1] == '2':
                 self.col += 1
+                return True
+            else:
+                return False
 
                 
     def move_up(self):
         if self.row > 0:
             if self.map_data[self.row - 1][self.col] == '0' or self.map_data[self.row - 1][self.col] == '3' or self.map_data[self.row - 1][self.col] == '2':
                 self.row -= 1
+                return True
+            else:
+                return False
     
     def move_down(self):
         if self.row < len(self.map_data) - 1:
             if self.map_data[self.row + 1][self.col] == '0' or self.map_data[self.row + 1][self.col]== '3' or self.map_data[self.row + 1][self.col] == '2':
                 self.row += 1
+                return True
+            else:
+                return False
 
     def move_up_left(self):
         if self.row > 0 and self.col > 0:
@@ -67,6 +79,9 @@ class Character:
             if color == (133, 151, 153, 255) or color == (248, 145, 150, 255):
                 self.row -= 1
                 self.col -= 1
+                return True
+            else:
+                return False
     
     def move_up_right(self):
         if self.row > 0 and self.col < len(self.map_data[0]) - 1:
@@ -74,6 +89,9 @@ class Character:
             if color == (133, 151, 153, 255) or color == (248, 145, 150, 255):
                 self.row -= 1
                 self.col += 1
+                return True
+            else:
+                return False
                 
     def move_down_left(self):
         if self.row < len(self.map_data) - 1 and self.col > 0:
@@ -81,6 +99,9 @@ class Character:
             if color == (133, 151, 153, 255) or color == (248, 145, 150, 255):
                 self.row += 1
                 self.col -= 1
+                return True
+            else:
+                return False
                 
     def move_down_right(self):
         if self.row < len(self.map_data) - 1 and self.col < len(self.map_data[0]) - 1:
@@ -88,6 +109,8 @@ class Character:
             if color == (133, 151, 153, 255) or color == (248, 145, 150, 255):
                 self.row += 1
                 self.col += 1
+            else:
+                return False
     
     def move(self):
         key = pygame.key.get_pressed()
@@ -265,47 +288,46 @@ class Seeker(Character):
         return False
     
     def move_up(self):
-        super().move_up()
-        self.score -= 1
-        self.move_count += 1
+        if super().move_up():
+            self.score -= 1
+            self.move_count += 1
         
     def move_down(self):
-        super().move_down()
-        self.score -= 1
-        self.move_count += 1
+        if super().move_down():
+            self.score -= 1
+            self.move_count += 1
     
     def move_left(self):
-        super().move_left()
-        self.score -= 1
-        self.move_count += 1
+        if super().move_left():
+            self.score -= 1
+            self.move_count += 1
 
     def move_right(self):
-        super().move_right()
-        self.score -= 1
-        self.move_count += 1
+        if super().move_right():
+            self.score -= 1
+            self.move_count += 1
 
     def move_up_left(self):
-        super().move_up_left()
-        self.score -= 1
-        self.move_count += 1
+        if super().move_up_left():
+            self.score -= 1
+            self.move_count += 1
    
     def move_up_right(self):
-        super().move_up_right()
-        self.score -= 1
-        self.move_count += 1
+        if super().move_up_right():
+            self.score -= 1
+            self.move_count += 1
     
     def move_down_left(self):
-        super().move_down_left()
-        self.score -= 1
-        self.move_count += 1
+        if super().move_down_left():
+            self.score -= 1
+            self.move_count += 1
     
     def move_down_right(self):
-        super().move_down_right()
-        self.score -= 1
-        self.move_count += 1
+        if super().move_down_right():
+            self.score -= 1
+            self.move_count += 1
      
     def get_hider_postion(self, hider_position):
-        self.hider_position.clear()
         self.hider_position.append(hider_position)
         
 class Hider(Character):
