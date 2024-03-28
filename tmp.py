@@ -58,4 +58,5 @@ while running:
     
     # Rest of your code remains the same
 
+#len(self.map_data[0])
 pygame.quit()
