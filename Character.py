@@ -12,7 +12,7 @@ class Character:
         self.col = 0
         self.tile_size = map.tile_size
         self.win = windows
-        self.move_delay = 1000
+        self.move_delay = 200
         self.last_move_time = 0
         self.visible_cells = None
         self.obstacle = None
@@ -40,34 +40,26 @@ class Character:
                     self.map_data[i][j] = '4'
                 
     def move_left(self):
-        current_time = pygame.time.get_ticks()
         if self.col > 0:
-            if current_time - self.last_move_time > self.move_delay:
-                if self.map_data[self.row][self.col - 1] == '0' or self.map_data[self.row][self.col - 1] == '3' or self.map_data[self.row][self.col - 1] == '2':
-                    self.col -= 1
+            if self.map_data[self.row][self.col - 1] == '0' or self.map_data[self.row][self.col - 1] == '3' or self.map_data[self.row][self.col - 1] == '2':
+                self.col -= 1
 
   
     def move_right(self):
-        current_time = pygame.time.get_ticks()
         if self.col < len(self.map_data[0]) - 1:
-            if current_time - self.last_move_time > self.move_delay:
-                if self.map_data[self.row][self.col + 1] == '0' or self.map_data[self.row][self.col + 1] == '3' or self.map_data[self.row][self.col + 1] == '2':
-                    self.col += 1
+            if self.map_data[self.row][self.col + 1] == '0' or self.map_data[self.row][self.col + 1] == '3' or self.map_data[self.row][self.col + 1] == '2':
+                self.col += 1
 
                 
     def move_up(self):
-        current_time = pygame.time.get_ticks()
         if self.row > 0:
-            if current_time - self.last_move_time > self.move_delay:
-                if self.map_data[self.row - 1][self.col] == '0' or self.map_data[self.row - 1][self.col] == '3' or self.map_data[self.row - 1][self.col] == '2':
-                    self.row -= 1
+            if self.map_data[self.row - 1][self.col] == '0' or self.map_data[self.row - 1][self.col] == '3' or self.map_data[self.row - 1][self.col] == '2':
+                self.row -= 1
     
     def move_down(self):
-        current_time = pygame.time.get_ticks()
         if self.row < len(self.map_data) - 1:
-            if current_time - self.last_move_time > self.move_delay:
-                if self.map_data[self.row + 1][self.col] == '0' or self.map_data[self.row + 1][self.col]== '3' or self.map_data[self.row + 1][self.col] == '2':
-                    self.row += 1
+            if self.map_data[self.row + 1][self.col] == '0' or self.map_data[self.row + 1][self.col]== '3' or self.map_data[self.row + 1][self.col] == '2':
+                self.row += 1
 
     def move_up_left(self):
         if self.row > 0 and self.col > 0:
@@ -168,7 +160,7 @@ class Character:
             self.obstacle = None
 
     def move_obstacle(self):
-        if (pygame.time.get_ticks() - self.last_move_time) > self.move_delay / 2:
+        if (pygame.time.get_ticks() - self.last_move_time) > self.move_delay:
             key = pygame.key.get_pressed()
             if key[pygame.K_UP]:
                 if self.row == 0 or self.map_data[self.row - 1][self.col] == '1':

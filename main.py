@@ -46,52 +46,51 @@ while running:
         
     m.draw()
     seeker.character_vision(3)
-
     pygame.draw.rect(win, (255, 0, 0), (seeker.col * m.tile_size, seeker.row * m.tile_size, m.tile_size, m.tile_size))
     pygame.draw.rect(win, (0, 0, 255), (hider.col * m.tile_size, hider.row * m.tile_size, m.tile_size, m.tile_size))
 
 
     for obs in obstacles:
         obs.draw()
+        if seeker.obstacle is None:
+            seeker.set_obstacle(obs)
+            seeker.reset_map_data()
+            seeker.remove_obstacle()
+        
         if seeker.can_pick_obstacle():
-            if seeker.obstacle is None:
-                seeker.set_obstacle(obs)
-                seeker.reset_map_data()
-                seeker.remove_obstacle()
             key = pygame.key.get_pressed()
             if key[pygame.K_g]:
                 seeker.set_obstacle(obs)
-            elif key[pygame.K_h]:
+            if key[pygame.K_h]:
                 seeker.remove_obstacle()
         else:
             seeker.remove_obstacle()
-        
-    if seeker.obstacle is None:
-        if len(seeker.move_data) == 0 and seeker.has_append_move == True:
-            break
-        seeker_move = seeker.random_move()
-        if seeker_move == 'Up':
-            seeker.move_up()
-        elif seeker_move == 'Down':
-            seeker.move_down()
-        elif seeker_move == 'Left':
-            seeker.move_left()
-        elif seeker_move == 'Right':
-            seeker.move_right()
-        seeker.character_vision(3)
-        seeker.move_data.pop(0)
-    # else:
-        # seeker.obstacle.remove_draw()
-        # seeker.move_obstacle()
-        # seeker.obstacle.draw()
-        # seeker.character_vision(3)
 
-    pygame.draw.rect(win, (255, 0, 0), (seeker.col * m.tile_size, seeker.row * m.tile_size, m.tile_size, m.tile_size))
+    if seeker.obstacle is None:
+        # if len(seeker.move_data) == 0 and seeker.has_append_move == True:
+        #     break
+        # seeker_move = seeker.random_move()
+        # if seeker_move == 'Up':
+        #     seeker.move_up()
+        # elif seeker_move == 'Down':
+        #     seeker.move_down()
+        # elif seeker_move == 'Left':
+        #     seeker.move_left()
+        # elif seeker_move == 'Right':
+        #     seeker.move_right()
+        # seeker.character_vision(3)
+        # seeker.move_data.pop(0)
+        seeker.move()
+    else:
+        #seeker.obstacle.remove_draw()
+        seeker.move_obstacle()
+        #seeker.obstacle.draw()
+
+
 
     SCORE_TEXT = SCORE_FONT.render(f'Score: {seeker.score}', True, (0, 0, 0))  # Create a text surface with the score
     win.blit(SCORE_TEXT, [0,0])   
     
-    pygame.draw.rect(win, (0, 0, 255), (hider.col * m.tile_size, hider.row * m.tile_size, m.tile_size, m.tile_size))
     
     # Update the display
     pygame.display.update()
@@ -135,7 +134,7 @@ while running:
         if event.type == pygame.QUIT:
             running = False
         
-    pygame.time.delay(1000)  # Adjust the delay time as needed
+    #pygame.time.delay(1000)  # Adjust the delay time as needed
 
 
 pygame.quit()
