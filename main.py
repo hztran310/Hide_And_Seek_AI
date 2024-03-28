@@ -39,16 +39,21 @@ for i in range(0, len(list_obstacles), 4):
     obs = Obstacle(list_obstacles[i], list_obstacles[i+1], list_obstacles[i+2], list_obstacles[i+3], m, win)
     obstacles.append(obs)
 
+annouce = None
+
 
 while running:
     clock.tick(FPS)
     win.fill((50, 133, 168))
+    
         
     m.draw()
+
     seeker.character_vision(3)
     pygame.draw.rect(win, (255, 0, 0), (seeker.col * m.tile_size, seeker.row * m.tile_size, m.tile_size, m.tile_size))
     pygame.draw.rect(win, (0, 0, 255), (hider.col * m.tile_size, hider.row * m.tile_size, m.tile_size, m.tile_size))
-
+    if annouce is not None:
+        pygame.draw.rect(win, ANNOUCE_COLOR, (annouce[1] * m.tile_size, annouce[0] * m.tile_size, m.tile_size, m.tile_size))
 
     for obs in obstacles:
         obs.draw()
@@ -105,22 +110,27 @@ while running:
         pygame.time.wait(3000)  # Wait for 3 seconds
         break
     
+    # if seeker.move_count == random_move:
+    #     random_move = random.choice(list)
+    #     hider_location = []
+    #     for i in range(0, num_hiders):
+    #         tmp = hider.annouce_location(2)
+    #         hider_location.append(tmp)
+    #         ANNOUNCE_LOCATION_TEXT = SCORE_FONT.render(f'Hider {i + 1} is at {tmp}', True, (0, 0, 0))
+    #         ANNOUNCE_LOCATION_REC = ANNOUNCE_LOCATION_TEXT.get_rect(center=(WIDTH // 2, HEIGHT // 2 + 50 * i))
+    #         win.blit(ANNOUNCE_LOCATION_TEXT, ANNOUNCE_LOCATION_REC.topleft)
+    #         pygame.display.update()
+    #         pygame.time.wait(1000)
+    #     seeker.move_count = 0
+    #     seeker.get_hider_postion(hider_location)
+    #     print(seeker.find_path(hider_location))
+
     if seeker.move_count == random_move:
         random_move = random.choice(list)
-        hider_location = []
         for i in range(0, num_hiders):
-            tmp = hider.annouce_location(2)
-            hider_location.append(tmp)
-            ANNOUNCE_LOCATION_TEXT = SCORE_FONT.render(f'Hider {i + 1} is at {tmp}', True, (0, 0, 0))
-            ANNOUNCE_LOCATION_REC = ANNOUNCE_LOCATION_TEXT.get_rect(center=(WIDTH // 2, HEIGHT // 2 + 50 * i))
-            win.blit(ANNOUNCE_LOCATION_TEXT, ANNOUNCE_LOCATION_REC.topleft)
+            annouce = hider.annouce_location(2)
             pygame.display.update()
-            pygame.time.wait(1000)
         seeker.move_count = 0
-        seeker.get_hider_postion(hider_location)
-
-    
-    
 
     SCORE_TEXT = SCORE_FONT.render(f'Score: {seeker.score}', True, (0, 0, 0))  # Create a text surface with the score
     win.blit(SCORE_TEXT, [0,0])   

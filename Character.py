@@ -3,6 +3,8 @@ from DrawMap import MAP
 from Obstacle import Obstacle
 import numpy as np
 import random
+import math
+from queue import PriorityQueue
 
 class Character:
     def __init__(self, character_type, map, windows):
@@ -329,7 +331,59 @@ class Seeker(Character):
      
     def get_hider_postion(self, hider_position):
         self.hider_position.append(hider_position)
-        
+
+    # def find_path(self, goal):
+    #     start = (self.row, self.col)
+
+    #     frontier = PriorityQueue()
+    #     frontier.put(start, 0)
+
+    #     came_from = {}
+    #     cost_so_far = {}
+    #     came_from[start] = None
+    #     cost_so_far[start] = 0
+
+    #     while not frontier.empty():
+    #         current = frontier.get()
+
+    #         if current == goal:
+    #             break
+
+    #         for next in self.neighbors(current):
+    #             new_cost = cost_so_far[current] + self.cost(current, next)
+    #             if next not in cost_so_far or new_cost < cost_so_far[next]:
+    #                 cost_so_far[next] = new_cost
+    #                 priority = new_cost + self.heuristic(goal, next)
+    #                 frontier.put(next, priority)
+    #                 came_from[next] = current
+
+    #     return self.reconstruct_path(came_from, goal)
+
+    def neighbors(self, node):
+        dirs = [(0, -1), (-1, 0), (0, 1), (1, 0), (-1, -1), (-1, 1), (1, -1), (1, 1)]
+        result = []
+        for dir in dirs:
+            new_node = (node[0] + dir[0], node[1] + dir[1])
+            if new_node[0] >= 0 and new_node[0] < len(self.map_data) and new_node[1] >= 0 and new_node[1] < len(self.map_data[0]):
+                result.append(new_node)
+        return result
+
+    def cost(self, from_node, to_node):
+        return 1  # Assuming each move costs 1
+
+    def heuristic(self, goal, next):
+        return abs(goal[0] - next[0]) + abs(goal[1] - next[1])  # Manhattan distance
+
+    def reconstruct_path(self, came_from, goal):
+        current = goal
+        path = []
+        while current is not None:
+            path.append(current)
+            current = came_from[current]
+        path.reverse()  # Optional: reverse the path to start-to-goal order
+        return path
+    
+
 class Hider(Character):
     def __init__(self, map, windows):
         super().__init__(2, map, windows)
