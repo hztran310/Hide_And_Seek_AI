@@ -12,10 +12,12 @@ class Character:
         self.col = 0
         self.tile_size = map.tile_size
         self.win = windows
-        self.move_delay = 200
+        self.move_delay = 1000
         self.last_move_time = 0
         self.visible_cells = None
         self.obstacle = None
+        self.move_data = []
+        self.has_append_move = False
         self.color = None
         
     def set_position(self):
@@ -38,34 +40,34 @@ class Character:
                     self.map_data[i][j] = '4'
                 
     def move_left(self):
+        current_time = pygame.time.get_ticks()
         if self.col > 0:
-            # color = self.win.get_at(((self.col - 1) * self.tile_size, self.row * self.tile_size))
-            # if color == (133, 151, 153, 255):
-            if self.map_data[self.row][self.col - 1] == '0' or self.map_data[self.row][self.col - 1] == '3' or self.map_data[self.row][self.col - 1] == '2':
-                self.col -= 1
+            if current_time - self.last_move_time > self.move_delay:
+                if self.map_data[self.row][self.col - 1] == '0' or self.map_data[self.row][self.col - 1] == '3' or self.map_data[self.row][self.col - 1] == '2':
+                    self.col -= 1
 
   
     def move_right(self):
+        current_time = pygame.time.get_ticks()
         if self.col < len(self.map_data[0]) - 1:
-            # color = self.win.get_at(((self.col + 1) * self.tile_size, self.row * self.tile_size))
-            # if color == (133, 151, 153, 255):
-            if self.map_data[self.row][self.col + 1] == '0' or self.map_data[self.row][self.col + 1] == '3' or self.map_data[self.row][self.col + 1] == '2':
-                self.col += 1
+            if current_time - self.last_move_time > self.move_delay:
+                if self.map_data[self.row][self.col + 1] == '0' or self.map_data[self.row][self.col + 1] == '3' or self.map_data[self.row][self.col + 1] == '2':
+                    self.col += 1
+
                 
     def move_up(self):
+        current_time = pygame.time.get_ticks()
         if self.row > 0:
-            # color = self.win.get_at((self.col * self.tile_size, (self.row - 1) * self.tile_size))
-            # if color == (133, 151, 153, 255):
-            if self.map_data[self.row - 1][self.col] == '0' or self.map_data[self.row - 1][self.col] == '3' or self.map_data[self.row - 1][self.col] == '2':
-                self.row -= 1
-
+            if current_time - self.last_move_time > self.move_delay:
+                if self.map_data[self.row - 1][self.col] == '0' or self.map_data[self.row - 1][self.col] == '3' or self.map_data[self.row - 1][self.col] == '2':
+                    self.row -= 1
     
     def move_down(self):
+        current_time = pygame.time.get_ticks()
         if self.row < len(self.map_data) - 1:
-            color = self.win.get_at((self.col * self.tile_size, (self.row + 1) * self.tile_size))
-            # if color == (133, 151, 153, 255):
-            if self.map_data[self.row + 1][self.col] == '0' or self.map_data[self.row + 1][self.col]== '3' or self.map_data[self.row + 1][self.col] == '2':
-                self.row += 1
+            if current_time - self.last_move_time > self.move_delay:
+                if self.map_data[self.row + 1][self.col] == '0' or self.map_data[self.row + 1][self.col]== '3' or self.map_data[self.row + 1][self.col] == '2':
+                    self.row += 1
 
     def move_up_left(self):
         if self.row > 0 and self.col > 0:
@@ -134,6 +136,16 @@ class Character:
             elif key[pygame.K_c]:
                 self.move_down_right()
             self.last_move_time = pygame.time.get_ticks()
+
+    def random_move(self):
+        if len(self.move_data) != 0 and self.has_append_move == True:
+            return self.move_data[0]
+        list = ['Up', 'Down', 'Left', 'Right']
+        for i in range(0, 20):
+            self.move_data.append(random.choice(list))
+        self.has_append_move = True
+        return self.move_data[0]
+
 
     def can_pick_obstacle(self):
         for direction in [(0, -1), (-1, 0), (0, 1), (1, 0), (-1, -1), (-1, 1), (1, -1), (1, 1)]:
@@ -264,49 +276,41 @@ class Seeker(Character):
         super().move_up()
         self.score -= 1
         self.move_count += 1
-        print(self.move_count)
         
     def move_down(self):
         super().move_down()
         self.score -= 1
         self.move_count += 1
-        print(self.move_count)
     
     def move_left(self):
         super().move_left()
         self.score -= 1
         self.move_count += 1
-        print(self.move_count)
 
     def move_right(self):
         super().move_right()
         self.score -= 1
         self.move_count += 1
-        print(self.move_count)
 
     def move_up_left(self):
         super().move_up_left()
         self.score -= 1
         self.move_count += 1
-        print(self.move_count)
    
     def move_up_right(self):
         super().move_up_right()
         self.score -= 1
         self.move_count += 1
-        print(self.move_count)
     
     def move_down_left(self):
         super().move_down_left()
         self.score -= 1
         self.move_count += 1
-        print(self.move_count)
     
     def move_down_right(self):
         super().move_down_right()
         self.score -= 1
         self.move_count += 1
-        print(self.move_count)
      
     def get_hider_postion(self, hider_position):
         self.hider_position.clear()
