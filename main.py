@@ -19,9 +19,10 @@ m = MAP('Map/Map1.txt', win)
 
 # Create the characters
 seeker = Seeker(m, win)
+seeker.color = (255, 0, 0)
 hider = Hider(m, win)
-num_hiders = 2
-
+num_hiders = 1
+hider.color = (0, 0, 255)
 
 # Set the initial positions of the characters
 seeker.set_position()
@@ -44,6 +45,11 @@ while running:
     win.fill((50, 133, 168))
         
     m.draw()
+    seeker.character_vision(3)
+
+    pygame.draw.rect(win, (255, 0, 0), (seeker.col * m.tile_size, seeker.row * m.tile_size, m.tile_size, m.tile_size))
+    pygame.draw.rect(win, (0, 0, 255), (hider.col * m.tile_size, hider.row * m.tile_size, m.tile_size, m.tile_size))
+
 
     for obs in obstacles:
         obs.draw()
@@ -75,25 +81,21 @@ while running:
         seeker.character_vision(3)
         seeker.move_data.pop(0)
     # else:
-    #     seeker.obstacle.remove_draw()
-    #     seeker.move_obstacle()
-    #     seeker.obstacle.draw()
-    #     seeker.character_vision(3)
-    
-    
-    
-    #Draw seeker
+        # seeker.obstacle.remove_draw()
+        # seeker.move_obstacle()
+        # seeker.obstacle.draw()
+        # seeker.character_vision(3)
+
     pygame.draw.rect(win, (255, 0, 0), (seeker.col * m.tile_size, seeker.row * m.tile_size, m.tile_size, m.tile_size))
 
     SCORE_TEXT = SCORE_FONT.render(f'Score: {seeker.score}', True, (0, 0, 0))  # Create a text surface with the score
     win.blit(SCORE_TEXT, [0,0])   
     
-    #Draw hider
     pygame.draw.rect(win, (0, 0, 255), (hider.col * m.tile_size, hider.row * m.tile_size, m.tile_size, m.tile_size))
     
     # Update the display
     pygame.display.update()
-
+    
     if seeker.found_hider(hider):
         win.fill((133, 151, 153), pygame.Rect(0, 0, SCORE_TEXT.get_width(), SCORE_TEXT.get_height()))  # Fill the area with white color
         pygame.display.update()
@@ -117,6 +119,17 @@ while running:
             pygame.time.wait(1000)
         seeker.move_count = 0
         seeker.get_hider_postion(hider_location)
+
+    
+    
+
+    SCORE_TEXT = SCORE_FONT.render(f'Score: {seeker.score}', True, (0, 0, 0))  # Create a text surface with the score
+    win.blit(SCORE_TEXT, [0,0])   
+    
+    
+    # Update the display
+    pygame.display.update()
+    
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:

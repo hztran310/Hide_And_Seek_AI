@@ -18,6 +18,7 @@ class Character:
         self.obstacle = None
         self.move_data = []
         self.has_append_move = False
+        self.color = None
         
     def set_position(self):
         for i, row in enumerate(self.map_data):
@@ -159,9 +160,11 @@ class Character:
     def set_obstacle(self, obstacle):
         if self.can_pick_obstacle():
             self.obstacle = obstacle
+            obstacle.character_color = self.color
 
     def remove_obstacle(self):
         if self.obstacle is not None:
+            self.obstacle.character_color = None
             self.obstacle = None
 
     def move_obstacle(self):
