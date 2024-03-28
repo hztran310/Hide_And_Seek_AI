@@ -2,8 +2,6 @@ import pygame
 from DrawMap import MAP
 from setting import *
 
-
-
 class Obstacle:
     def __init__(self, top, left, down, right, map, windows):
         self.top = top
@@ -25,7 +23,7 @@ class Obstacle:
 
         for y in range(top, down, self.tile_size):
             for x in range(left, right, self.tile_size):
-                pygame.draw.rect(self.win, (255, 255, 0), (x, y, self.tile_size, self.tile_size))
+                pygame.draw.rect(self.win, COLOR_OBS, (x, y, self.tile_size, self.tile_size))
     
     def remove_draw(self):
         top = self.top * self.tile_size
@@ -35,13 +33,13 @@ class Obstacle:
 
         for y in range(top, down, self.tile_size):
             for x in range(left, right, self.tile_size):
-                pygame.draw.rect(self.win, (133, 151, 153), (x, y, self.tile_size, self.tile_size))
+                pygame.draw.rect(self.win, COLOR_FLOOR, (x, y, self.tile_size, self.tile_size))
 
     def is_legal_move(self, x, y):
         color = self.win.get_at((x,y))
-        if color == (252, 250, 245, 255):
+        if color == (COLOR_WALL[0], COLOR_WALL[1], COLOR_WALL[2], 255):
             return False
-        elif color == (133, 151, 153, 255) or color == (248, 145, 150, 255) or color == (ANNOUCE_COLOR[0], ANNOUCE_COLOR[1], ANNOUCE_COLOR[2], 255):
+        elif color == (COLOR_FLOOR[0], COLOR_FLOOR[1], COLOR_FLOOR[2], 255) or color == (COLOR_VIEW[0], COLOR_VIEW[1], COLOR_VIEW[2], 255) or color == (COLOR_ANNOUNCE[0], COLOR_ANNOUNCE[1], COLOR_ANNOUNCE[2], 255):
             return True
         elif color != (self.character_color[0], self.character_color[1], self.character_color[2], 255):
             return False

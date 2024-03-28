@@ -5,6 +5,7 @@ import numpy as np
 import random
 import math
 from queue import PriorityQueue
+from setting import *
 
 class Character:
     def __init__(self, character_type, map, windows):
@@ -78,7 +79,7 @@ class Character:
     def move_up_left(self):
         if self.row > 0 and self.col > 0:
             color = self.win.get_at(((self.col - 1) * self.tile_size, (self.row - 1) * self.tile_size))
-            if color == (133, 151, 153, 255) or color == (248, 145, 150, 255):
+            if color == (COLOR_FLOOR[0], COLOR_FLOOR[1], COLOR_FLOOR[2], 255) or color == (COLOR_VIEW[0], COLOR_VIEW[1], COLOR_VIEW[2], 255):
                 self.row -= 1
                 self.col -= 1
                 return True
@@ -88,7 +89,7 @@ class Character:
     def move_up_right(self):
         if self.row > 0 and self.col < len(self.map_data[0]) - 1:
             color = self.win.get_at(((self.col + 1) * self.tile_size, (self.row - 1) * self.tile_size))
-            if color == (133, 151, 153, 255) or color == (248, 145, 150, 255):
+            if color == (COLOR_FLOOR[0], COLOR_FLOOR[1], COLOR_FLOOR[2], 255) or color == (COLOR_VIEW[0], COLOR_VIEW[1], COLOR_VIEW[2], 255):
                 self.row -= 1
                 self.col += 1
                 return True
@@ -98,7 +99,7 @@ class Character:
     def move_down_left(self):
         if self.row < len(self.map_data) - 1 and self.col > 0:
             color = self.win.get_at(((self.col - 1) * self.tile_size, (self.row + 1) * self.tile_size))
-            if color == (133, 151, 153, 255) or color == (248, 145, 150, 255):
+            if color == (COLOR_FLOOR[0], COLOR_FLOOR[1], COLOR_FLOOR[2], 255) or color == (COLOR_VIEW[0], COLOR_VIEW[1], COLOR_VIEW[2], 255):
                 self.row += 1
                 self.col -= 1
                 return True
@@ -108,7 +109,7 @@ class Character:
     def move_down_right(self):
         if self.row < len(self.map_data) - 1 and self.col < len(self.map_data[0]) - 1:
             color = self.win.get_at(((self.col + 1) * self.tile_size, (self.row + 1) * self.tile_size))
-            if color == (133, 151, 153, 255) or color == (248, 145, 150, 255):
+            if color == (COLOR_FLOOR[0], COLOR_FLOOR[1], COLOR_FLOOR[2], 255) or color == (COLOR_VIEW[0], COLOR_VIEW[1], COLOR_VIEW[2], 255):
                 self.row += 1
                 self.col += 1
             else:
@@ -170,7 +171,7 @@ class Character:
             col = self.col + direction[1]
             if row >= 0 and row < len(self.map_data) and col >= 0 and col < len(self.map_data[0]):
                 color = self.win.get_at((col * self.tile_size, row * self.tile_size))
-                if color == (255, 255, 0, 255):
+                if color == (COLOR_OBS[0], COLOR_OBS[1], COLOR_OBS[2], 255):
                     return True
         return False
 
@@ -228,10 +229,10 @@ class Character:
         for new_x in range(left_limit, right_limit):
             for new_y in range(top_limit, bottom_limit):
                 color = self.win.get_at((new_y * self.tile_size, new_x * self.tile_size))
-                if not (new_x == x and new_y == y) and color != (252, 250, 245, 255) and color != (255, 255, 0, 255):
+                if not (new_x == x and new_y == y) and color != (COLOR_WALL[0], COLOR_WALL[1], COLOR_WALL[2], 255) and color != (COLOR_OBS[0], COLOR_OBS[1], COLOR_OBS[2], 255):
                     if self.has_line_of_sight((x, y), (new_x, new_y)):
                         self.visible_cells[new_x, new_y] = True
-                        pygame.draw.rect(self.win,(248, 145, 150), (new_y * self.tile_size, new_x * self.tile_size, self.tile_size, self.tile_size))
+                        pygame.draw.rect(self.win, COLOR_VIEW, (new_y * self.tile_size, new_x * self.tile_size, self.tile_size, self.tile_size))
 
         self.visible_cells[x, y] = False
 
@@ -242,7 +243,7 @@ class Character:
         for point in points:
             x, y = point
             color = self.win.get_at((y * self.tile_size, x * self.tile_size))
-            if color == (252, 250, 245, 255):  # If the point is a wall, return False
+            if color == (COLOR_WALL[0], COLOR_WALL[1], COLOR_WALL[2], 255):  # If the point is a wall, return False
                 return False
         return True
     

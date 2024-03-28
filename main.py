@@ -19,10 +19,10 @@ m = MAP('Map/Map1.txt', win)
 
 # Create the characters
 seeker = Seeker(m, win)
-seeker.color = (255, 0, 0)
+seeker.color = COLOR_SEEKER
 hider = Hider(m, win)
 num_hiders = 1
-hider.color = (0, 0, 255)
+hider.color = COLOR_HIDER
 
 # Set the initial positions of the characters
 seeker.set_position()
@@ -44,16 +44,16 @@ annouce = None
 
 while running:
     clock.tick(FPS)
-    win.fill((50, 133, 168))
+    win.fill(COLOR_WINDOW)
     
         
     m.draw()
 
     seeker.character_vision(3)
-    pygame.draw.rect(win, (255, 0, 0), (seeker.col * m.tile_size, seeker.row * m.tile_size, m.tile_size, m.tile_size))
-    pygame.draw.rect(win, (0, 0, 255), (hider.col * m.tile_size, hider.row * m.tile_size, m.tile_size, m.tile_size))
+    pygame.draw.rect(win, COLOR_SEEKER, (seeker.col * m.tile_size, seeker.row * m.tile_size, m.tile_size, m.tile_size))
+    pygame.draw.rect(win, COLOR_HIDER, (hider.col * m.tile_size, hider.row * m.tile_size, m.tile_size, m.tile_size))
     if annouce is not None:
-        pygame.draw.rect(win, ANNOUCE_COLOR, (annouce[1] * m.tile_size, annouce[0] * m.tile_size, m.tile_size, m.tile_size))
+        pygame.draw.rect(win, COLOR_ANNOUNCE, (annouce[1] * m.tile_size, annouce[0] * m.tile_size, m.tile_size, m.tile_size))
 
     for obs in obstacles:
         obs.draw()
@@ -101,7 +101,7 @@ while running:
     pygame.display.update()
     
     if seeker.found_hider(hider):
-        win.fill((133, 151, 153), pygame.Rect(0, 0, SCORE_TEXT.get_width(), SCORE_TEXT.get_height()))  # Fill the area with white color
+        win.fill(COLOR_FLOOR, pygame.Rect(0, 0, SCORE_TEXT.get_width(), SCORE_TEXT.get_height()))  # Fill the area with white color
         pygame.display.update()
         SCORE_TEXT = SCORE_FONT.render(f'Score: {seeker.score}', True, (0, 0, 0))  # Create a text surface with the score
         win.blit(SCORE_TEXT, [0,0])
