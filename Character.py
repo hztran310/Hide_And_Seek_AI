@@ -64,28 +64,28 @@ class Character:
     def move_up_left(self):
         if self.row > 0 and self.col > 0:
             color = self.win.get_at(((self.col - 1) * self.tile_size, (self.row - 1) * self.tile_size))
-            if color == (133, 151, 153, 255):
+            if color == (133, 151, 153, 255) or color == (248, 145, 150, 255):
                 self.row -= 1
                 self.col -= 1
     
     def move_up_right(self):
         if self.row > 0 and self.col < len(self.map_data[0]) - 1:
             color = self.win.get_at(((self.col + 1) * self.tile_size, (self.row - 1) * self.tile_size))
-            if color == (133, 151, 153, 255):
+            if color == (133, 151, 153, 255) or color == (248, 145, 150, 255):
                 self.row -= 1
                 self.col += 1
                 
     def move_down_left(self):
         if self.row < len(self.map_data) - 1 and self.col > 0:
             color = self.win.get_at(((self.col - 1) * self.tile_size, (self.row + 1) * self.tile_size))
-            if color == (133, 151, 153, 255):
+            if color == (133, 151, 153, 255) or color == (248, 145, 150, 255):
                 self.row += 1
                 self.col -= 1
                 
     def move_down_right(self):
         if self.row < len(self.map_data) - 1 and self.col < len(self.map_data[0]) - 1:
             color = self.win.get_at(((self.col + 1) * self.tile_size, (self.row + 1) * self.tile_size))
-            if color == (133, 151, 153, 255):
+            if color == (133, 151, 153, 255) or color == (248, 145, 150, 255):
                 self.row += 1
                 self.col += 1
     
