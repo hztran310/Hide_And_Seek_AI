@@ -1,4 +1,5 @@
 import pygame
+import heapq
 
 pygame.init()
 

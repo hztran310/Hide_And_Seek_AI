@@ -19,7 +19,6 @@ class Character:
         self.last_move_time = 0
         self.visible_cells = None
         self.obstacle = None
-        self.move_data = []
         self.has_append_move = False
         self.color = None
         
@@ -41,84 +40,65 @@ class Character:
             for i in range(self.obstacle.top, self.obstacle.down + 1):
                 for j in range(self.obstacle.left, self.obstacle.right + 1):
                     self.map_data[i][j] = '4'
+
+    def is_valid_move(self, position):
+        row, col = position
+        if row >= 0 and row < len(self.map_data) and col >= 0 and col < len(self.map_data[0]):
+            return self.map_data[row][col] == '0' or self.map_data[row][col] == '3' or self.map_data[row][col] == '2'
+        return False
                 
     def move_left(self):
-        if self.col > 0:
-            if self.map_data[self.row][self.col - 1] == '0' or self.map_data[self.row][self.col - 1] == '3' or self.map_data[self.row][self.col - 1] == '2':
-                self.col -= 1
-                return True
-            else:
-                return False
+        if self.is_valid_move((self.row, self.col - 1)):
+            self.col -= 1
+            return True
+        return False
 
   
     def move_right(self):
-        if self.col < len(self.map_data[0]) - 1:
-            if self.map_data[self.row][self.col + 1] == '0' or self.map_data[self.row][self.col + 1] == '3' or self.map_data[self.row][self.col + 1] == '2':
-                self.col += 1
-                return True
-            else:
-                return False
-
+        if self.is_valid_move((self.row, self.col + 1)):
+            self.col += 1
+            return True
+        return False
                 
     def move_up(self):
-        if self.row > 0:
-            if self.map_data[self.row - 1][self.col] == '0' or self.map_data[self.row - 1][self.col] == '3' or self.map_data[self.row - 1][self.col] == '2':
-                self.row -= 1
-                return True
-            else:
-                return False
+        if self.is_valid_move((self.row - 1, self.col)):
+            self.row -= 1
+            return True
+        return False
     
     def move_down(self):
-        if self.row < len(self.map_data) - 1:
-            if self.map_data[self.row + 1][self.col] == '0' or self.map_data[self.row + 1][self.col]== '3' or self.map_data[self.row + 1][self.col] == '2':
-                self.row += 1
-                return True
-            else:
-                return False
+        if self.is_valid_move((self.row + 1, self.col)):
+            self.row += 1
+            return True
+        return False
 
     def move_up_left(self):
-        if self.row > 0 and self.col > 0:
-            # color = self.win.get_at(((self.col - 1) * self.tile_size, (self.row - 1) * self.tile_size))
-            # if color == (COLOR_FLOOR[0], COLOR_FLOOR[1], COLOR_FLOOR[2], 255) or color == (COLOR_VIEW[0], COLOR_VIEW[1], COLOR_VIEW[2], 255):
-            if self.map_data[self.row - 1][self.col - 1] == '0' or self.map_data[self.row - 1][self.col - 1] == '3' or self.map_data[self.row - 1][self.col - 1] == '2':
-                self.row -= 1
-                self.col -= 1
-                return True
-            else:
-                return False
+        if self.is_valid_move((self.row - 1, self.col - 1)):
+            self.row -= 1
+            self.col -= 1
+            return True
+        return False
     
     def move_up_right(self):
-        if self.row > 0 and self.col < len(self.map_data[0]) - 1:
-            # color = self.win.get_at(((self.col + 1) * self.tile_size, (self.row - 1) * self.tile_size))
-            # if color == (COLOR_FLOOR[0], COLOR_FLOOR[1], COLOR_FLOOR[2], 255) or color == (COLOR_VIEW[0], COLOR_VIEW[1], COLOR_VIEW[2], 255):
-            if self.map_data[self.row - 1][self.col + 1] == '0' or self.map_data[self.row - 1][self.col + 1] == '3' or self.map_data[self.row - 1][self.col + 1] == '2':
-                self.row -= 1
-                self.col += 1
-                return True
-            else:
-                return False
+        if self.is_valid_move((self.row - 1, self.col + 1)):
+            self.row -= 1
+            self.col += 1
+            return True
+        return False
                 
     def move_down_left(self):
-        if self.row < len(self.map_data) - 1 and self.col > 0:
-            # color = self.win.get_at(((self.col - 1) * self.tile_size, (self.row + 1) * self.tile_size))
-            # if color == (COLOR_FLOOR[0], COLOR_FLOOR[1], COLOR_FLOOR[2], 255) or color == (COLOR_VIEW[0], COLOR_VIEW[1], COLOR_VIEW[2], 255):
-            if self.map_data[self.row + 1][self.col - 1] == '0' or self.map_data[self.row + 1][self.col - 1] == '3' or self.map_data[self.row + 1][self.col - 1] == '2':
-                self.row += 1
-                self.col -= 1
-                return True
-            else:
-                return False
+        if self.is_valid_move((self.row + 1, self.col - 1)):
+            self.row += 1
+            self.col -= 1
+            return True
+        return False
                 
     def move_down_right(self):
-        if self.row < len(self.map_data) - 1 and self.col < len(self.map_data[0]) - 1:
-            # color = self.win.get_at(((self.col + 1) * self.tile_size, (self.row + 1) * self.tile_size))
-            # if color == (COLOR_FLOOR[0], COLOR_FLOOR[1], COLOR_FLOOR[2], 255) or color == (COLOR_VIEW[0], COLOR_VIEW[1], COLOR_VIEW[2], 255):
-            if self.map_data[self.row + 1][self.col + 1] == '0' or self.map_data[self.row + 1][self.col + 1] == '3' or self.map_data[self.row + 1][self.col + 1] == '2':
-                self.row += 1
-                self.col += 1
-                return True
-            else:
-                return False
+        if self.is_valid_move((self.row + 1, self.col + 1)):
+            self.row += 1
+            self.col += 1
+            return True
+        return False
     
     def move(self):
         key = pygame.key.get_pressed()
@@ -222,7 +202,7 @@ class Character:
     
     def character_vision(self, vision_range):
         grid_size = len(self.map_data)
-        self.visible_cells = np.zeros((grid_size, grid_size), dtype=bool)
+        self.visible_cells = []
 
         x, y = self.row, self.col
 
@@ -236,10 +216,8 @@ class Character:
                 color = self.win.get_at((new_y * self.tile_size, new_x * self.tile_size))
                 if not (new_x == x and new_y == y) and color != (COLOR_WALL[0], COLOR_WALL[1], COLOR_WALL[2], 255) and color != (COLOR_OBS[0], COLOR_OBS[1], COLOR_OBS[2], 255):
                     if self.has_line_of_sight((x, y), (new_x, new_y)):
-                        self.visible_cells[new_x, new_y] = True
+                        self.visible_cells.append((new_x, new_y))
                         pygame.draw.rect(self.win, COLOR_VIEW, (new_y * self.tile_size, new_x * self.tile_size, self.tile_size, self.tile_size))
-
-        self.visible_cells[x, y] = False
 
         return self.visible_cells
     
@@ -288,7 +266,8 @@ class Seeker(Character):
         self.score = 0
         self.hider_position = []
         self.move_count = 0
-        self.move_data = None
+        self.move_data = [[]]
+        self.target_location = None
     
     def found_hider(self, hider):
         if self.row == hider.row and self.col == hider.col:
@@ -339,51 +318,42 @@ class Seeker(Character):
     def get_hider_postion(self, hider_position):
         self.hider_position.append(hider_position)
 
-    def find_path(self, goal):
-        if self.move_data is not None:
-            pass
-        start = (self.row, self.col)
+    def find_path(self, start, goal):
+        frontier = []
+        heapq.heappush(frontier, (0, start))
+        came_from = {start: None}
+        cost_so_far = {start: 0}
 
-        frontier = PriorityQueue()
-        frontier.put(start, 0)
+        while frontier:
+            current_cost, current_node = heapq.heappop(frontier)
 
-        came_from = {}
-        cost_so_far = {}
-        came_from[start] = None
-        cost_so_far[start] = 0
-
-        while not frontier.empty():
-            current = frontier.get()
-
-            if current == goal:
+            if current_node == goal:
                 break
 
-            for next in self.neighbors(current):
-                new_cost = cost_so_far[current] + self.cost(current, next)
-                if next not in cost_so_far or new_cost < cost_so_far[next]:
-                    cost_so_far[next] = new_cost
-                    priority = new_cost + self.heuristic(goal, next)
-                    frontier.put(next, priority)
-                    came_from[next] = current
+            for next_node in self.neighbors(current_node):
+                new_cost = cost_so_far[current_node] + self.cost(current_node, next_node)
+                if next_node not in cost_so_far or new_cost < cost_so_far[next_node]:
+                    cost_so_far[next_node] = new_cost
+                    priority = new_cost
+                    heapq.heappush(frontier, (priority, next_node))
+                    came_from[next_node] = current_node
 
         return self.reconstruct_path(came_from, goal)
-
+    
+    def cost(self, current, next):
+        return 1
+    
     def neighbors(self, node):
+        # This function returns the neighbors of a node in an 8-connected grid.
         dirs = [(0, -1), (-1, 0), (0, 1), (1, 0), (-1, -1), (-1, 1), (1, -1), (1, 1)]
         result = []
         for dir in dirs:
             new_node = (node[0] + dir[0], node[1] + dir[1])
-            if self.map_data[new_node[0]][new_node[1]] == '0' or self.map_data[new_node[0]][new_node[1]] == '3' or self.map_data[new_node[0]][new_node[1]] == '2':
-                continue
-            if new_node[0] >= 0 and new_node[0] < len(self.map_data) and new_node[1] >= 0 and new_node[1] < len(self.map_data[0]):
+            if (new_node[0] >= 0 and new_node[0] < len(self.map_data) and
+                new_node[1] >= 0 and new_node[1] < len(self.map_data[0]) and
+                self.map_data[new_node[0]][new_node[1]] != '1' and self.map_data[new_node[0]][new_node[1]] != '4' and self.map_data[new_node[0]][new_node[1]] != '3'):  # Skip if the node is a wall
                 result.append(new_node)
         return result
-
-    def cost(self, from_node, to_node):
-        return 1  # Assuming each move costs 1
-
-    def heuristic(self, goal, next):
-        return math.sqrt((goal[0] - next[0]) ** 2 + (goal[1] - next[1]) ** 2)
     
     def reconstruct_path(self, came_from, goal):
         current = goal
@@ -391,8 +361,7 @@ class Seeker(Character):
         while current is not None:
             path.append(current)
             current = came_from[current]
-        path.reverse()  # Optional: reverse the path to start-to-goal order
-        return path
+        return path[::-1]  
     
     def move_to_neighbor(self, neighbor):
         if self.row - 1 == neighbor[0] and self.col == neighbor[1]:
@@ -411,6 +380,40 @@ class Seeker(Character):
             return 'Down_Right'
         elif self.row + 1 == neighbor[0] and self.col - 1 == neighbor[1]:
             return 'Down_Left'
+        
+    def move_towards_target(self):
+        if self.target_location is not None:
+            # Use the A* algorithm to find the shortest path to the target
+            path = self.find_path((self.row, self.col), self.target_location)
+
+            # If a path was found, move to the next cell in the path
+            if path:
+                next_cell = path[0]
+                if (next_cell[0] == self.row and next_cell[1] == self.col):
+                    path.pop(0)
+                    next_cell = path[0]
+                direction = self.move_to_neighbor(next_cell)
+
+                # Call the appropriate movement method based on the direction
+                if direction == 'Up':
+                    self.move_up()
+                elif direction == 'Down':
+                    self.move_down()
+                elif direction == 'Left':
+                    self.move_left()
+                elif direction == 'Right':
+                    self.move_right()
+                elif direction == 'Up_Left':
+                    self.move_up_left()
+                elif direction == 'Up_Right':
+                    self.move_up_right()
+                elif direction == 'Down_Left':
+                    self.move_down_left()
+                elif direction == 'Down_Right':
+                    self.move_down_right()
+
+    def set_target_location(self, position):
+        self.target_location = position
         
 
 class Hider(Character):
