@@ -46,7 +46,6 @@ while running:
     clock.tick(FPS)
     win.fill(COLOR_WINDOW)
     
-        
     m.draw()
 
     seeker.character_vision(3)
@@ -54,6 +53,9 @@ while running:
     pygame.draw.rect(win, COLOR_HIDER, (hider.col * m.tile_size, hider.row * m.tile_size, m.tile_size, m.tile_size))
     if annouce is not None:
         pygame.draw.rect(win, COLOR_ANNOUNCE, (annouce[1] * m.tile_size, annouce[0] * m.tile_size, m.tile_size, m.tile_size))
+        if seeker.move_data is None:
+            seeker.move_data = seeker.find_path(annouce)
+
 
     for obs in obstacles:
         obs.draw()
@@ -71,31 +73,90 @@ while running:
         else:
             seeker.remove_obstacle()
 
-    if seeker.obstacle is None:
-        # if len(seeker.move_data) == 0 and seeker.has_append_move == True:
-        #     break
-        # seeker_move = seeker.random_move()
-        # if seeker_move == 'Up':
-        #     seeker.move_up()
-        # elif seeker_move == 'Down':
-        #     seeker.move_down()
-        # elif seeker_move == 'Left':
-        #     seeker.move_left()
-        # elif seeker_move == 'Right':
-        #     seeker.move_right()
-        # seeker.character_vision(3)
-        # seeker.move_data.pop(0)
-        seeker.move()
-    else:
-        #seeker.obstacle.remove_draw()
-        seeker.move_obstacle()
+    # if seeker.obstacle is not None:
+    #     if len(seeker.move_data) == 0 and seeker.has_append_move == True:
+    #         break
+    #     if seeker.move_data[0] == seeker.row and seeker.move_data[1] == seeker.col:
+    #         seeker.move_data.pop(0)
+    #     seeker_move = seeker.move_to_neighbor(seeker.move_data[0])
+    #     print(seeker.move_data[0])
+    #     if seeker_move == 'Up':
+    #         seeker.move_up()
+    #     elif seeker_move == 'Down':
+    #         seeker.move_down()
+    #     elif seeker_move == 'Left':
+    #         seeker.move_left()
+    #     elif seeker_move == 'Right':
+    #         seeker.move_right()
+    #     elif seeker_move == 'Down_Left':
+    #         seeker.move_down_left
+    #     elif seeker_move == 'Down_Right':
+    #         seeker.move_down_right
+    #     elif seeker_move == 'Up_Left':
+    #         seeker.move_up_left
+    #     elif seeker_move == 'Up_Right':
+    #         seeker.move_up_right
+    #     seeker.character_vision(3)
+    #     seeker.move_data.pop(0)
+    #     seeker.move()
+    # else:
+    #     seeker.obstacle.remove_draw()
+        # seeker.move_obstacle()
         #seeker.obstacle.draw()
+    # else:
+    #     seeker.move()
+
+
+    if seeker.move_data is not None:
+        if len(seeker.move_data) == 0 and seeker.has_append_move == True:
+            break
+        if seeker.move_data[0] == seeker.row and seeker.move_data[1] == seeker.col:
+            seeker.move_data.pop(0)
+        seeker_move = seeker.move_to_neighbor(seeker.move_data[0])
+        if seeker_move == 'Up':
+            seeker.move_up()
+        elif seeker_move == 'Down':
+            seeker.move_down()
+        elif seeker_move == 'Left':
+            seeker.move_left()
+        elif seeker_move == 'Right':
+            seeker.move_right()
+        elif seeker_move == 'Down_Left':
+            seeker.move_down_left()
+        elif seeker_move == 'Down_Right':
+            seeker.move_down_right()
+        elif seeker_move == 'Up_Left':
+            seeker.move_up_left()
+        elif seeker_move == 'Up_Right':
+            seeker.move_up_right()
+        #seeker.character_vision(3)
+        seeker.move_data.pop(0)
+    else:
+        random_list = ['Up', 'Down', 'Left', 'Right', 'Down_Left', 'Down_Right', 'Up_Left', 'Up_Right']
+        move = random.choice(random_list)
+        if move == 'Up':
+            seeker.move_up()
+        elif move == 'Down':
+            seeker.move_down()
+        elif move == 'Left':
+            seeker.move_left()
+        elif move == 'Right':
+            seeker.move_right()
+        elif move == 'Down_Left':
+            seeker.move_down_left()
+        elif move == 'Down_Right':
+            seeker.move_down_right()
+        elif move == 'Up_Left':
+            seeker.move_up_left()
+        elif move == 'Up_Right':
+            seeker.move_up_right()
+        #seeker.character_vision(3)
 
 
 
     SCORE_TEXT = SCORE_FONT.render(f'Score: {seeker.score}', True, (0, 0, 0))  # Create a text surface with the score
     win.blit(SCORE_TEXT, [0,0])   
-    
+
     
     # Update the display
     pygame.display.update()
@@ -129,7 +190,6 @@ while running:
         random_move = random.choice(list)
         for i in range(0, num_hiders):
             annouce = hider.annouce_location(2)
-            pygame.display.update()
         seeker.move_count = 0
 
     SCORE_TEXT = SCORE_FONT.render(f'Score: {seeker.score}', True, (0, 0, 0))  # Create a text surface with the score
