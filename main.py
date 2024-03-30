@@ -21,26 +21,32 @@ m = MAP('Map/Map1.txt', win)
 seeker = Seeker(m, win)
 seeker.color = COLOR_SEEKER
 hider = Hider(m, win)
-num_hiders = 1
-hider.color = COLOR_HIDER
-
+num_hiders = 2
+hiders = [Hider(m, win) for i in range(num_hiders)]
+for hider in hiders:
+    hider.color = COLOR_HIDER
+    
 # Set the initial positions of the characters
 seeker.set_position()
-hider.set_position()
-
+initial_hider_position = []
+for hider in hiders:
+    hider.set_position(initial_hider_position)
+    initial_hider_position.append((hider.row, hider.col))
+    
 running = True
 clock = pygame.time.Clock()
 
 list = [5, 6, 7, 8, 9, 10]
 random_move = random.choice(list)
+
 list_obstacles = m.get_obstacles()
 obstacles = []
 for i in range(0, len(list_obstacles), 4):
     obs = Obstacle(list_obstacles[i], list_obstacles[i+1], list_obstacles[i+2], list_obstacles[i+3], m, win)
     obstacles.append(obs)
 
-annouce = None
-
+announce = []
+announce_len = -1
 
 while running:
     clock.tick(FPS)
@@ -48,10 +54,15 @@ while running:
     
     m.draw()
 
-    if annouce is not None:
-        pygame.draw.rect(win, COLOR_ANNOUNCE, (annouce[1] * m.tile_size, annouce[0] * m.tile_size, m.tile_size, m.tile_size))
+    if announce is not None:
+        for i in range(len(announce)):
+            pygame.draw.rect(win, COLOR_ANNOUNCE, (announce[i][1] * m.tile_size, announce[i][0] * m.tile_size, m.tile_size, m.tile_size))
         if seeker.target_location is None:
-            seeker.set_target_location(annouce)
+            for i in range(len(announce)):
+                if announce[i] in seeker.visited_announce:
+                    announce.pop(i)
+                    break
+            seeker.set_target_location(announce)
 
     for obs in obstacles:
         obs.draw()
@@ -104,24 +115,28 @@ while running:
     seeker.character_vision(3)
     if seeker.visible_cells is not None:
         for cell in seeker.visible_cells:
-            if hider.row == cell[0] and hider.col == cell[1]:
-                seeker.move_data.clear
-                seeker.set_target_location((hider.row, hider.col))
+            for hider in hiders:
+                if hider.row == cell[0] and hider.col == cell[1]:
+                    seeker.move_data.clear()
+                    seeker.set_target_location((hider.row, hider.col))
 
     pygame.draw.rect(win, COLOR_SEEKER, (seeker.col * m.tile_size, seeker.row * m.tile_size, m.tile_size, m.tile_size))
-    pygame.draw.rect(win, COLOR_HIDER, (hider.col * m.tile_size, hider.row * m.tile_size, m.tile_size, m.tile_size))
+    
+    for hider in hiders:
+        pygame.draw.rect(win, COLOR_HIDER, (hider.col * m.tile_size, hider.row * m.tile_size, m.tile_size, m.tile_size))
 
-    if annouce is not None:
-        pygame.draw.rect(win, COLOR_ANNOUNCE, (annouce[1] * m.tile_size, annouce[0] * m.tile_size, m.tile_size, m.tile_size))
+    if announce is not None:
+        for i in range(len(announce)):
+            pygame.draw.rect(win, COLOR_ANNOUNCE, (announce[i][1] * m.tile_size, announce[i][0] * m.tile_size, m.tile_size, m.tile_size))
 
     SCORE_TEXT = SCORE_FONT.render(f'Score: {seeker.score}', True, (0, 0, 0))  # Create a text surface with the score
     win.blit(SCORE_TEXT, [0,0])   
-
     
     # Update the display
     pygame.display.update()
     
-    if seeker.found_hider(hider):
+    if seeker.found_hider(hiders, num_hiders):
+        num_hiders -= 1
         win.fill(COLOR_FLOOR, pygame.Rect(0, 0, SCORE_TEXT.get_width(), SCORE_TEXT.get_height()))  # Fill the area with white color
         pygame.display.update()
         SCORE_TEXT = SCORE_FONT.render(f'Score: {seeker.score}', True, (0, 0, 0))  # Create a text surface with the score
@@ -129,12 +144,13 @@ while running:
         win.blit(TEXT_HIDER_FOUND, TEXT_REC.topleft)  # Draw the text at the calculated position
         pygame.display.update()
         pygame.time.wait(3000)  # Wait for 3 seconds
-        break
+        if num_hiders == 0:
+            break
 
     if seeker.move_count == random_move:
         random_move = random.choice(list)
-        for i in range(0, num_hiders):
-            annouce = hider.annouce_location(2)
+        for hider in hiders:
+            announce.append(random.choice(hider.announce_location(2)))
         seeker.move_count = 0
 
     SCORE_TEXT = SCORE_FONT.render(f'Score: {seeker.score}', True, (0, 0, 0))  # Create a text surface with the score
