@@ -57,26 +57,22 @@ while running:
     win.fill(COLOR_WINDOW)
     
     m.draw()
+    
+    print('seeker.target_location', seeker.target_location)
 
     if announce is not None:
         for i in range(len(announce)):
             pygame.draw.rect(win, COLOR_ANNOUNCE, (announce[i][1] * m.tile_size, announce[i][0] * m.tile_size, m.tile_size, m.tile_size))
         if seeker.target_location is None:
-            print(seeker.target_location)
-            min_distance = math.inf
             res = None
+            min_distance = math.inf
             for i in range(len(announce)):
                 if distance((seeker.row, seeker.col), (announce[i][0], announce[i][1])) < min_distance:
                     min_distance = distance((seeker.row, seeker.col), (announce[i][0], announce[i][1]))
-                    if announce[i] in seeker.visited_announce:
-                        announce.pop(i)
-                        continue
                     res = announce[i]
             if res is not None:
-                print('res: ', res)
-                seeker.set_target_location((res[0], res[1]))
-        print('hehehehe')
-        print(seeker.target_location)
+                seeker.set_target_location(res)
+        
     for obs in obstacles:
         obs.draw()
         if seeker.obstacle is None:
@@ -94,7 +90,7 @@ while running:
             seeker.remove_obstacle()
 
     if seeker.target_location is not None:
-        seeker.move_towards_target()
+        seeker.move_towards_target(announce)
         pygame.time.wait(200)
     else:
         random_list = ['Up', 'Down', 'Left', 'Right', 'Down_Left', 'Down_Right', 'Up_Left', 'Up_Right']
@@ -132,11 +128,11 @@ while running:
                 if hider.row == cell[0] and hider.col == cell[1]:
                     seeker.target_location = None
                     seeker.set_target_location((hider.row, hider.col))
-
-    pygame.draw.rect(win, COLOR_SEEKER, (seeker.col * m.tile_size, seeker.row * m.tile_size, m.tile_size, m.tile_size))
     
     for hider in hiders:
         pygame.draw.rect(win, COLOR_HIDER, (hider.col * m.tile_size, hider.row * m.tile_size, m.tile_size, m.tile_size))
+        
+    pygame.draw.rect(win, COLOR_SEEKER, (seeker.col * m.tile_size, seeker.row * m.tile_size, m.tile_size, m.tile_size))
 
     if announce is not None:
         for i in range(len(announce)):
@@ -156,7 +152,7 @@ while running:
         win.blit(SCORE_TEXT, [0,0])
         win.blit(TEXT_HIDER_FOUND, TEXT_REC.topleft)  # Draw the text at the calculated position
         pygame.display.update()
-        pygame.time.wait(3000)  # Wait for 3 seconds
+        pygame.time.wait(2000)  # Wait for 3 seconds
         if num_hiders == 0:
             break
 
@@ -179,7 +175,6 @@ while running:
         if event.type == pygame.QUIT:
             running = False
         
-    #pygame.time.delay(1000)  # Adjust the delay time as needed
 
 
 pygame.quit()

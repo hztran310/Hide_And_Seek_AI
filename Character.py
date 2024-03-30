@@ -389,7 +389,7 @@ class Seeker(Character):
         elif self.row + 1 == neighbor[0] and self.col - 1 == neighbor[1]:
             return 'Down_Left'
         
-    def move_towards_target(self):
+    def move_towards_target(self, announce):
         if self.target_location is not None:
             # Use the A* algorithm to find the shortest path to the target
             path = self.find_path((self.row, self.col), self.target_location)
@@ -423,27 +423,12 @@ class Seeker(Character):
                     self.move_down_right()
             
             if self.row == self.target_location[0] and self.col == self.target_location[1]:
+                if self.target_location in announce:
+                    announce.remove(self.target_location)
                 self.target_location = None
 
     def set_target_location(self, positions):
-        if positions is None:
-            return
-        if len(positions) == 1:
-            self.target_location = positions[0]
-            return
-        min_distance = float('inf')
-        for i in range(len(positions)):
-            tmp = positions[i]
-            if not isinstance(tmp, tuple):
-            # Skip integers or non-tuple elements
-                continue
-            if tmp in self.visited_announce:
-                continue
-            res = math.sqrt((tmp[0] - self.row) ** 2 + (tmp[1] - self.col) ** 2)
-            if res < min_distance:
-                min_distance = res
-                self.target_location = (tmp[0], tmp[1])
-                self.visited_announce.append(self.target_location)
+        self.target_location = positions
         
 class Hider(Character):
     def __init__(self, map, windows):
@@ -474,6 +459,8 @@ class Hider(Character):
         
         for i in range (left_limit, right_limit):
             for j in range(top_limit, bottom_limit):
+                if i == self.row and j == self.col:
+                    continue
                 randomList.append((i, j))
         
         return randomList  # Return the whole list, not just a random choice
