@@ -3,7 +3,6 @@ from DrawMap import MAP
 from Obstacle import Obstacle
 import numpy as np
 import random
-import math
 from queue import PriorityQueue
 from setting import *
 
@@ -28,7 +27,7 @@ class Character:
                 if col == str(self.character_type):
                     self.row = i
                     self.col = j
-                    return
+                    # return
                 
     def reset_map_data(self):
         for i, row in enumerate(self.map_data):
@@ -268,11 +267,17 @@ class Seeker(Character):
         self.move_count = 0
         self.move_data = [[]]
         self.target_location = None
+        self.visited_announce = []
     
-    def found_hider(self, hider):
-        if self.row == hider.row and self.col == hider.col:
-            self.score += 20
-            return True
+    def found_hider(self, hiders, num_hiders, announces):
+        for i in range(num_hiders):
+            if self.row == hiders[i].row and self.col == hiders[i].col:
+                self.score += 20
+                for hider_announce in hiders[i].announce_location_position:
+                    if hider_announce in announces:
+                        announces.remove(hider_announce)
+                hiders.pop(i)
+                return True
         return False
     
     def move_up(self):
@@ -381,7 +386,7 @@ class Seeker(Character):
         elif self.row + 1 == neighbor[0] and self.col - 1 == neighbor[1]:
             return 'Down_Left'
         
-    def move_towards_target(self):
+    def move_towards_target(self, announce):
         if self.target_location is not None:
             # Use the A* algorithm to find the shortest path to the target
             path = self.find_path((self.row, self.col), self.target_location)
@@ -391,7 +396,9 @@ class Seeker(Character):
                 next_cell = path[0]
                 if (next_cell[0] == self.row and next_cell[1] == self.col):
                     path.pop(0)
-                    next_cell = path[0]
+                    if path:
+                        next_cell = path[0]
+                    # next_cell = path[0]
                 direction = self.move_to_neighbor(next_cell)
 
                 # Call the appropriate movement method based on the direction
@@ -411,19 +418,40 @@ class Seeker(Character):
                     self.move_down_left()
                 elif direction == 'Down_Right':
                     self.move_down_right()
+            
+            if self.row == self.target_location[0] and self.col == self.target_location[1]:
+                if self.target_location in announce:
+                    announce.remove(self.target_location)
+                self.target_location = None
 
-    def set_target_location(self, position):
-        self.target_location = position
+    def set_target_location(self, positions):
+        self.target_location = positions
         
-
+    def check_target_location_is_walkable(self):
+        if self.target_location is not None:
+            if self.map_data[self.target_location[0]][self.target_location[1]] == '1' or self.map_data[self.target_location[0]][self.target_location[1]] == '4':
+                self.target_location = None
+        
 class Hider(Character):
     def __init__(self, map, windows):
         super().__init__(2, map, windows)
+        self.initial_hider_position = []
+        self.announce_location_position = []
+
     
     def move(self):
         pass
     
-    def annouce_location(self, unit_range):
+    def set_position(self, initial_hider_position):
+        for i, row in enumerate(self.map_data):
+            for j, col in enumerate(row):
+                if col == str(self.character_type):
+                    if (i, j) not in initial_hider_position:
+                        self.row = i
+                        self.col = j
+                        return
+
+    def announce_location(self, unit_range):
         grid_size = len(self.map_data)
         
         left_limit = max(0, self.row - unit_range)
@@ -435,6 +463,8 @@ class Hider(Character):
         
         for i in range (left_limit, right_limit):
             for j in range(top_limit, bottom_limit):
+                if i == self.row and j == self.col:
+                    continue
                 randomList.append((i, j))
         
         return random.choice(randomList)

@@ -17,7 +17,11 @@ COLOR_ANNOUNCE = (157, 194, 242)
 
 FONT = pygame.font.Font(None, 36)  # Create a font object
 TEXT_HIDER_FOUND = FONT.render('Hider found!', True, (0, 0, 0))  # Create a text surface
-TEXT_REC = TEXT_HIDER_FOUND.get_rect(center=(WIDTH // 2, HEIGHT // 2))  # Get the rectangle around the text and center it
+TEXT_HIDER_FOUND_REC = TEXT_HIDER_FOUND.get_rect(center=(WIDTH // 2, HEIGHT // 2))  # Get the rectangle around the text and center it
 
 SCORE_FONT = pygame.font.SysFont("commicsansms", 25)  # Create a font object for the score
+
+GAME_OVER_TEXT = FONT.render('Last Hider Found! Game Over!', True, (0, 0, 0))  # Create a text surface
+GAME_OVER_REC = GAME_OVER_TEXT.get_rect(center=(WIDTH // 2, HEIGHT // 2))  # Get the rectangle around the text and center it
+
 
