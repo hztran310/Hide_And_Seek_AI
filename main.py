@@ -3,8 +3,10 @@ from DrawMap import MAP
 from Character import Character, Seeker, Hider
 from setting import *
 import random
+import math
 
 from Obstacle import Obstacle
+
     
 # Initialize Pygame
 pygame.init()
@@ -46,7 +48,9 @@ for i in range(0, len(list_obstacles), 4):
     obstacles.append(obs)
 
 announce = []
-announce_len = -1
+
+def distance(p1, p2):
+    return math.sqrt((p1[0] - p2[0])**2 + (p1[1] - p2[1])**2)
 
 while running:
     clock.tick(FPS)
@@ -58,12 +62,21 @@ while running:
         for i in range(len(announce)):
             pygame.draw.rect(win, COLOR_ANNOUNCE, (announce[i][1] * m.tile_size, announce[i][0] * m.tile_size, m.tile_size, m.tile_size))
         if seeker.target_location is None:
+            print(seeker.target_location)
+            min_distance = math.inf
+            res = None
             for i in range(len(announce)):
-                if announce[i] in seeker.visited_announce:
-                    announce.pop(i)
-                    break
-            seeker.set_target_location(announce)
-
+                if distance((seeker.row, seeker.col), (announce[i][0], announce[i][1])) < min_distance:
+                    min_distance = distance((seeker.row, seeker.col), (announce[i][0], announce[i][1]))
+                    if announce[i] in seeker.visited_announce:
+                        announce.pop(i)
+                        continue
+                    res = announce[i]
+            if res is not None:
+                print('res: ', res)
+                seeker.set_target_location((res[0], res[1]))
+        print('hehehehe')
+        print(seeker.target_location)
     for obs in obstacles:
         obs.draw()
         if seeker.obstacle is None:
@@ -82,7 +95,7 @@ while running:
 
     if seeker.target_location is not None:
         seeker.move_towards_target()
-        pygame.time.wait(1000)
+        pygame.time.wait(200)
     else:
         random_list = ['Up', 'Down', 'Left', 'Right', 'Down_Left', 'Down_Right', 'Up_Left', 'Up_Right']
         seeker_move = random.choice(random_list)
@@ -110,14 +123,14 @@ while running:
         elif seeker_move == 'Up_Right':
             if seeker.is_valid_move((seeker.row - 1, seeker.col + 1)):
                 seeker.move_up_right()
-        pygame.time.wait(1000)
+        pygame.time.wait(200)
 
     seeker.character_vision(3)
     if seeker.visible_cells is not None:
         for cell in seeker.visible_cells:
             for hider in hiders:
                 if hider.row == cell[0] and hider.col == cell[1]:
-                    seeker.move_data.clear()
+                    seeker.target_location = None
                     seeker.set_target_location((hider.row, hider.col))
 
     pygame.draw.rect(win, COLOR_SEEKER, (seeker.col * m.tile_size, seeker.row * m.tile_size, m.tile_size, m.tile_size))
@@ -152,6 +165,7 @@ while running:
         for hider in hiders:
             announce.append(random.choice(hider.announce_location(2)))
         seeker.move_count = 0
+
 
     SCORE_TEXT = SCORE_FONT.render(f'Score: {seeker.score}', True, (0, 0, 0))  # Create a text surface with the score
     win.blit(SCORE_TEXT, [0,0])   
