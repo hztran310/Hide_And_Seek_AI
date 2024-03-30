@@ -87,6 +87,8 @@ while running:
         else:
             seeker.remove_obstacle()
 
+    seeker.check_target_location_is_walkable()
+    
     if seeker.target_location is not None:
         seeker.move_towards_target(announce)
         pygame.time.wait(200)
@@ -171,7 +173,6 @@ while running:
 
     SCORE_TEXT = SCORE_FONT.render(f'Score: {seeker.score}', True, (0, 0, 0))  # Create a text surface with the score
     win.blit(SCORE_TEXT, [0,0])   
-    
     
     # Update the display
     pygame.display.update()

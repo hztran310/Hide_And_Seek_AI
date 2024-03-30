@@ -427,6 +427,11 @@ class Seeker(Character):
     def set_target_location(self, positions):
         self.target_location = positions
         
+    def check_target_location_is_walkable(self):
+        if self.target_location is not None:
+            if self.map_data[self.target_location[0]][self.target_location[1]] == '1' or self.map_data[self.target_location[0]][self.target_location[1]] == '4':
+                self.target_location = None
+        
 class Hider(Character):
     def __init__(self, map, windows):
         super().__init__(2, map, windows)
