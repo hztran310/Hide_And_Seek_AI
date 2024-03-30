@@ -3,7 +3,6 @@ from DrawMap import MAP
 from Obstacle import Obstacle
 import numpy as np
 import random
-import math
 from queue import PriorityQueue
 from setting import *
 
@@ -270,17 +269,15 @@ class Seeker(Character):
         self.target_location = None
         self.visited_announce = []
     
-    def found_hider(self, hiders, num_hiders):
+    def found_hider(self, hiders, num_hiders, announces):
         for i in range(num_hiders):
             if self.row == hiders[i].row and self.col == hiders[i].col:
                 self.score += 20
+                for hider_announce in hiders[i].announce_location_position:
+                    if hider_announce in announces:
+                        announces.remove(hider_announce)
                 hiders.pop(i)
                 return True
-        # for hider in hiders:
-        #     if self.row == hider.row and self.col == hider.col:
-        #         self.score += 20
-        #         hiders.remove(hider)
-        #         return True
         return False
     
     def move_up(self):
@@ -434,6 +431,8 @@ class Hider(Character):
     def __init__(self, map, windows):
         super().__init__(2, map, windows)
         self.initial_hider_position = []
+        self.announce_location_position = []
+
     
     def move(self):
         pass
@@ -463,6 +462,6 @@ class Hider(Character):
                     continue
                 randomList.append((i, j))
         
-        return randomList  # Return the whole list, not just a random choice
+        return random.choice(randomList)
                 
         

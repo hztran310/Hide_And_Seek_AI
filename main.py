@@ -58,8 +58,6 @@ while running:
     
     m.draw()
     
-    print('seeker.target_location', seeker.target_location)
-
     if announce is not None:
         for i in range(len(announce)):
             pygame.draw.rect(win, COLOR_ANNOUNCE, (announce[i][1] * m.tile_size, announce[i][0] * m.tile_size, m.tile_size, m.tile_size))
@@ -132,11 +130,11 @@ while running:
     for hider in hiders:
         pygame.draw.rect(win, COLOR_HIDER, (hider.col * m.tile_size, hider.row * m.tile_size, m.tile_size, m.tile_size))
         
-    pygame.draw.rect(win, COLOR_SEEKER, (seeker.col * m.tile_size, seeker.row * m.tile_size, m.tile_size, m.tile_size))
-
     if announce is not None:
         for i in range(len(announce)):
             pygame.draw.rect(win, COLOR_ANNOUNCE, (announce[i][1] * m.tile_size, announce[i][0] * m.tile_size, m.tile_size, m.tile_size))
+            
+    pygame.draw.rect(win, COLOR_SEEKER, (seeker.col * m.tile_size, seeker.row * m.tile_size, m.tile_size, m.tile_size))
 
     SCORE_TEXT = SCORE_FONT.render(f'Score: {seeker.score}', True, (0, 0, 0))  # Create a text surface with the score
     win.blit(SCORE_TEXT, [0,0])   
@@ -144,22 +142,30 @@ while running:
     # Update the display
     pygame.display.update()
     
-    if seeker.found_hider(hiders, num_hiders):
+    if seeker.found_hider(hiders, num_hiders, announce):
         num_hiders -= 1
         win.fill(COLOR_FLOOR, pygame.Rect(0, 0, SCORE_TEXT.get_width(), SCORE_TEXT.get_height()))  # Fill the area with white color
         pygame.display.update()
         SCORE_TEXT = SCORE_FONT.render(f'Score: {seeker.score}', True, (0, 0, 0))  # Create a text surface with the score
         win.blit(SCORE_TEXT, [0,0])
-        win.blit(TEXT_HIDER_FOUND, TEXT_REC.topleft)  # Draw the text at the calculated position
+        if num_hiders == 0:
+            win.fill(COLOR_FLOOR, pygame.Rect(0, 0, TEXT_HIDER_FOUND.get_width(), TEXT_HIDER_FOUND.get_height()))  # Fill the area with white color
+            pygame.display.update()
+            win.blit(GAME_OVER_TEXT, GAME_OVER_REC.topleft)    
+            pygame.display.update()        
+            pygame.time.wait(2000)  # Wait for 3 seconds
+            break
+        win.blit(TEXT_HIDER_FOUND, TEXT_HIDER_FOUND_REC.topleft)  # Draw the text at the calculated position
         pygame.display.update()
         pygame.time.wait(2000)  # Wait for 3 seconds
-        if num_hiders == 0:
-            break
+        
 
     if seeker.move_count == random_move:
         random_move = random.choice(list)
         for hider in hiders:
-            announce.append(random.choice(hider.announce_location(2)))
+            tmp = hider.announce_location(2)
+            announce.append(tmp)
+            hider.announce_location_position.append(tmp)
         seeker.move_count = 0
 
 
