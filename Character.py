@@ -437,6 +437,7 @@ class Hider(Character):
         super().__init__(2, map, windows)
         self.initial_hider_position = []
         self.announce_location_position = []
+        self.is_announcing = False
 
     
     def move(self):
@@ -463,10 +464,11 @@ class Hider(Character):
         
         for i in range (left_limit, right_limit):
             for j in range(top_limit, bottom_limit):
-                if i == self.row and j == self.col:
+                if (i == self.row and j == self.col) or (self.map_data[i][j] == '1' or self.map_data[i][j] == '4'):
                     continue
                 randomList.append((i, j))
-        
-        return random.choice(randomList)
-                
+        announce_pos = random.choice(randomList)
+        pygame.draw.rect(self.win, COLOR_ANNOUNCE, (announce_pos[1] * self.tile_size, announce_pos[0] * self.tile_size, self.tile_size, self.tile_size))        
+        return announce_pos
+                    
         
