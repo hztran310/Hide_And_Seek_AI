@@ -21,6 +21,18 @@ class MAP:
     def get_map_data(self):
         return self.map_data
     
+    def reset_to_initial(self, filename):
+        self.player = None
+        self.map_data.clear()
+        self.obstacles = list()
+        with open(os.path.normpath(filename), 'r') as file:
+            rows, cols = map(int, file.readline().split()) 
+            for _ in range(rows):
+                self.map_data.append(list(file.readline().strip()))
+            for line in file:
+                for number in line.split():
+                    self.obstacles.append(int(number))
+    
     def get_obstacles(self):
         return self.obstacles
 

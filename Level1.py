@@ -4,16 +4,21 @@ from Character import Character, Seeker, Hider
 from setting import *
 import random
 import math
-
 from Obstacle import Obstacle
+from Button import ImageButton
+
+#Create button instance
+start_button = ImageButton(start_img, 680, 250)
+exit_button = ImageButton(exit_img, 680, 350)
 
 def run_level1():
-
     # Initialize Pygame
     pygame.init()
 
+    game_started = False
+    game_over = False
+    
     # Create the display window
-
     pygame.display.set_caption('Hide & Seek')
 
     # Create the map
@@ -48,27 +53,46 @@ def run_level1():
         obstacles.append(obs)
 
     announce = []
+    
+    back_to_main_menu = False
 
     def distance(p1, p2):
         return math.sqrt((p1[0] - p2[0])**2 + (p1[1] - p2[1])**2)
-
+  
     while running:
         clock.tick(FPS)
 
         win.fill(COLOR_WINDOW)
+        
         m.draw()
-        
-        
-        if announce is not None:
-            if seeker.target_location is None:
-                res = None
-                min_distance = math.inf
-                for i in range(len(announce)):
-                    if distance((seeker.row, seeker.col), (announce[i][0], announce[i][1])) < min_distance:
-                        min_distance = distance((seeker.row, seeker.col), (announce[i][0], announce[i][1]))
-                        res = announce[i]
-                if res is not None:
-                    seeker.set_target_location(res)
+                        
+        start_button.draw(win)
+        exit_button.draw(win)
+
+        for event in pygame.event.get():
+            pos = pygame.mouse.get_pos()
+            if event.type == pygame.QUIT:
+                running = False
+                pygame.quit()
+                pygame.display.quit()
+            if event.type == pygame.MOUSEBUTTONDOWN and game_started is False:
+                if start_button.isOver(pos):
+                    game_started = True
+                if exit_button.isOver(pos):
+                    running = False
+                    back_to_main_menu = True
+                
+        if game_started == True:
+            if announce is not None:
+                if seeker.target_location is None:
+                    res = None
+                    min_distance = math.inf
+                    for i in range(len(announce)):
+                        if distance((seeker.row, seeker.col), (announce[i][0], announce[i][1])) < min_distance:
+                            min_distance = distance((seeker.row, seeker.col), (announce[i][0], announce[i][1]))
+                            res = announce[i]
+                    if res is not None:
+                        seeker.set_target_location(res)
             
         for obs in obstacles:
             obs.draw()
@@ -88,37 +112,38 @@ def run_level1():
 
         seeker.check_target_location_is_walkable()
         
-        if seeker.target_location is not None:
-            seeker.move_towards_target(announce)
-            pygame.time.wait(200)
-        else:
-            random_list = ['Up', 'Down', 'Left', 'Right', 'Down_Left', 'Down_Right', 'Up_Left', 'Up_Right']
-            seeker_move = random.choice(random_list)
-            if seeker_move == 'Up':
-                if seeker.is_valid_move((seeker.row - 1, seeker.col)):
-                    seeker.move_up()
-            elif seeker_move == 'Down':
-                if seeker.is_valid_move((seeker.row + 1, seeker.col)):
-                    seeker.move_down()
-            elif seeker_move == 'Left':
-                if seeker.is_valid_move((seeker.row, seeker.col - 1)):
-                    seeker.move_left()
-            elif seeker_move == 'Right':
-                if seeker.is_valid_move((seeker.row, seeker.col + 1)):
-                    seeker.move_right()
-            elif seeker_move == 'Down_Left':
-                if seeker.is_valid_move((seeker.row + 1, seeker.col - 1)):
-                    seeker.move_down_left()
-            elif seeker_move == 'Down_Right':
-                if seeker.is_valid_move((seeker.row + 1, seeker.col + 1)):
-                    seeker.move_down_right()
-            elif seeker_move == 'Up_Left':
-                if seeker.is_valid_move((seeker.row - 1, seeker.col - 1)):
-                    seeker.move_up_left()
-            elif seeker_move == 'Up_Right':
-                if seeker.is_valid_move((seeker.row - 1, seeker.col + 1)):
-                    seeker.move_up_right()
-            pygame.time.wait(200)
+        if game_started == True:
+            if seeker.target_location is not None:
+                seeker.move_towards_target(announce)
+                pygame.time.wait(200)
+            else:
+                random_list = ['Up', 'Down', 'Left', 'Right', 'Down_Left', 'Down_Right', 'Up_Left', 'Up_Right']
+                seeker_move = random.choice(random_list)
+                if seeker_move == 'Up':
+                    if seeker.is_valid_move((seeker.row - 1, seeker.col)):
+                        seeker.move_up()
+                elif seeker_move == 'Down':
+                    if seeker.is_valid_move((seeker.row + 1, seeker.col)):
+                        seeker.move_down()
+                elif seeker_move == 'Left':
+                    if seeker.is_valid_move((seeker.row, seeker.col - 1)):
+                        seeker.move_left()
+                elif seeker_move == 'Right':
+                    if seeker.is_valid_move((seeker.row, seeker.col + 1)):
+                        seeker.move_right()
+                elif seeker_move == 'Down_Left':
+                    if seeker.is_valid_move((seeker.row + 1, seeker.col - 1)):
+                        seeker.move_down_left()
+                elif seeker_move == 'Down_Right':
+                    if seeker.is_valid_move((seeker.row + 1, seeker.col + 1)):
+                        seeker.move_down_right()
+                elif seeker_move == 'Up_Left':
+                    if seeker.is_valid_move((seeker.row - 1, seeker.col - 1)):
+                        seeker.move_up_left()
+                elif seeker_move == 'Up_Right':
+                    if seeker.is_valid_move((seeker.row - 1, seeker.col + 1)):
+                        seeker.move_up_right()
+                pygame.time.wait(200)
 
         seeker.character_vision(3)
         if seeker.visible_cells is not None:
@@ -146,17 +171,35 @@ def run_level1():
             SCORE_TEXT = SCORE_FONT.render(f'Score: {seeker.score}', True, (0, 0, 0))  # Create a text surface with the score
             win.blit(SCORE_TEXT, [0,0])
             if num_hiders == 0:
+                game_over = True
                 win.fill(COLOR_FLOOR, pygame.Rect(0, 0, TEXT_HIDER_FOUND.get_width(), TEXT_HIDER_FOUND.get_height()))  # Fill the area with white color
                 pygame.display.update()
                 win.blit(GAME_OVER_TEXT, GAME_OVER_REC.topleft)    
+                win.blit(RESTART_TEXT, RESTART_REC.topleft)
                 pygame.display.update()        
+                while True:
+                    for event in pygame.event.get():
+                        if event.type == pygame.QUIT:
+                            running = False
+                            pygame.quit()
+                            pygame.display.quit()
+                        elif event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE and game_over:
+                            running = False
+                            game_started = False
+                            game_over = False
+                            run_level1()
+                        elif event.type == pygame.MOUSEBUTTONDOWN:
+                            pos = pygame.mouse.get_pos()
+                            if exit_button.isOver(pos):
+                                running = False
+                                back_to_main_menu = True
+                                return back_to_main_menu
+                    pygame.display.update()
+            else:
+                win.blit(TEXT_HIDER_FOUND, TEXT_HIDER_FOUND_REC.topleft)  # Draw the text at the calculated position
+                pygame.display.update()
                 pygame.time.wait(2000)  # Wait for 3 seconds
-                break
-            win.blit(TEXT_HIDER_FOUND, TEXT_HIDER_FOUND_REC.topleft)  # Draw the text at the calculated position
-            pygame.display.update()
-            pygame.time.wait(2000)  # Wait for 3 seconds
             
-
         if seeker.move_count == random_move:
             random_move = random.choice(list)
             for hider in hiders:
@@ -168,15 +211,18 @@ def run_level1():
 
         SCORE_TEXT = SCORE_FONT.render(f'Score: {seeker.score}', True, (0, 0, 0))  # Create a text surface with the score
         win.blit(SCORE_TEXT, [0,0])   
-        
-        # Update the display
-        pygame.display.update()
-        
+    
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
-            
+                pygame.quit()
+                                
+        # Update the display
+        pygame.display.update()
+        
+    return back_to_main_menu
 
 
-    pygame.quit()
+        
+    

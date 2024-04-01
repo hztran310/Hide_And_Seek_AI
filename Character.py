@@ -28,6 +28,14 @@ class Character:
                     self.row = i
                     self.col = j
                     # return
+    
+    def get_initial_position(self):
+        for i, row in enumerate(self.map_data):
+            for j, col in enumerate(row):
+                if col == str(self.character_type):
+                    self.row = i
+                    self.col = j
+                    break
                 
     def reset_map_data(self):
         for i, row in enumerate(self.map_data):
