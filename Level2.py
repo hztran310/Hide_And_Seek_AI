@@ -22,7 +22,7 @@ def run_level2():
     game_over = False
 
     # Create the map
-    m = MAP('Map/Map1.txt', win)
+    m = MAP('Map/Map2.txt', win)
 
     # Create the characters
     seeker = Seeker(m, win)
@@ -57,7 +57,9 @@ def run_level2():
     back_to_main_menu = False
 
     def distance(p1, p2):
-        return math.sqrt((p1[0] - p2[0])**2 + (p1[1] - p2[1])**2)
+        len_p2 = len(seeker.find_path((seeker.row, seeker.col), (p2[0], p2[1])))
+        len_p1 = len(seeker.find_path((seeker.row, seeker.col), (p1[0], p1[1])))
+        return min(len_p1, len_p2)
 
     while running:
         clock.tick(FPS)

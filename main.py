@@ -6,6 +6,8 @@ from Button import Button
 def main_menu():
     # Initialize Pygame
     pygame.init()
+    pygame.display.set_caption('Hide & Seek')
+
     
     # Set up the clock
     clock = pygame.time.Clock()
