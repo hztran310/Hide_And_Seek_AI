@@ -56,6 +56,8 @@ def run_level2():
     
     back_to_main_menu = False
 
+    may_be_hider = [[-1, -1], [-1, -1]]
+
     def distance(p1, p2):
         len_p2 = len(seeker.find_path((seeker.row, seeker.col), (p2[0], p2[1])))
         len_p1 = len(seeker.find_path((seeker.row, seeker.col), (p1[0], p1[1])))
@@ -85,15 +87,18 @@ def run_level2():
         
         if game_started == True:
             if announce is not None:
-                if seeker.target_location is None:
-                    res = None
-                    min_distance = math.inf
-                    for i in range(len(announce)):
-                        if distance((seeker.row, seeker.col), (announce[i][0], announce[i][1])) < min_distance:
-                            min_distance = distance((seeker.row, seeker.col), (announce[i][0], announce[i][1]))
-                            res = announce[i]
-                    if res is not None:
-                        seeker.set_target_location(res)
+                if seeker.hider_location is None:
+                    closest_distance = float('inf') 
+                    closest_location = None  
+                    for cell_list in may_be_hider:
+                        if cell_list != [-1, -1]:
+                            for cell in cell_list:
+                                dist = distance((seeker.row, seeker.col), cell)  
+                                if dist < closest_distance:  
+                                    closest_distance = dist
+                                    closest_location = cell  
+                    if closest_location is not None:  
+                        seeker.set_target_location(closest_location) 
             
         for obs in obstacles:
             obs.draw()
@@ -154,6 +159,7 @@ def run_level2():
                     if hider.row == cell[0] and hider.col == cell[1]:
                         seeker.target_location = None
                         seeker.set_target_location((hider.row, hider.col))
+                        seeker.hider_location = (hider.row, hider.col)
         
         for hider in hiders:
             pygame.draw.rect(win, COLOR_HIDER, (hider.col * m.tile_size, hider.row * m.tile_size, m.tile_size, m.tile_size))
@@ -167,6 +173,12 @@ def run_level2():
         pygame.display.update()
         
         if seeker.found_hider(hiders, num_hiders, announce):
+            seeker.hider_location = None
+            for cell_list in may_be_hider:
+                for cell in cell_list:
+                    if cell == (seeker.row, seeker.col):
+                        may_be_hider.remove(cell_list)
+
             num_hiders -= 1
             win.fill(COLOR_FLOOR, pygame.Rect(0, 0, SCORE_TEXT.get_width(), SCORE_TEXT.get_height()))  # Fill the area with white color
             pygame.display.update()
@@ -202,13 +214,24 @@ def run_level2():
                 pygame.display.update()
                 pygame.time.wait(2000)  # Wait for 3 seconds
             
-
         if seeker.move_count == random_move:
+            hider_check = 0
             random_move = random.choice(list)
             for hider in hiders:
-                tmp = hider.announce_location(2)
-                announce.append(tmp)
-                hider.announce_location_position.append(tmp)
+                cell_list = []
+                temp = hider.announce_location(3)
+                for i in range(temp[0] - 3, temp[0] + 4):
+                    for j in range(temp[1] - 3, temp[1] + 4):
+                        if i >= 0 and i < len(seeker.map_data) and j >= 0 and j < len(seeker.map_data[0]) and seeker.map_data[i][j] != '1' and seeker.map_data[i][j] != '4':
+                            cell_list.append((i, j))
+
+                if may_be_hider[hider_check] == [-1, -1]:
+                    may_be_hider[hider_check] = cell_list
+                else:
+                    may_be_hider[hider_check] = [cell for cell in may_be_hider[hider_check] if cell in cell_list]
+                hider_check += 1
+                announce.append(temp)
+                hider.announce_location_position.append(temp)
             seeker.move_count = 0
 
 

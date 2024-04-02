@@ -273,9 +273,8 @@ class Seeker(Character):
         self.score = 0
         self.hider_position = []
         self.move_count = 0
-        self.move_data = [[]]
         self.target_location = None
-        self.visited_announce = []
+        self.hider_location = None
     
     def found_hider(self, hiders, num_hiders, announces):
         for i in range(num_hiders):
@@ -328,9 +327,6 @@ class Seeker(Character):
             self.score -= 1
             self.move_count += 1
      
-    def get_hider_postion(self, hider_position):
-        self.hider_position.append(hider_position)
-
     def find_path(self, start, goal):
         frontier = []
         heapq.heappush(frontier, (0, start))
