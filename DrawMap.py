@@ -3,7 +3,7 @@ import os
 from setting import *
 
 class MAP:
-    def __init__(self,filename, windows):
+    def __init__(self, filename, windows):
         self.player = None
         self.map_data = []
         self.obstacles = list()
