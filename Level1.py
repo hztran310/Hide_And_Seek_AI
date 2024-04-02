@@ -201,7 +201,7 @@ def run_level1():
                             running = False
                             game_started = False
                             game_over = False
-                            run_level2()
+                            run_level1()
                         elif event.type == pygame.MOUSEBUTTONDOWN:
                             pos = pygame.mouse.get_pos()
                             if exit_button.isOver(pos):
