@@ -112,6 +112,7 @@ def movement(num_hiders, filename):
                                     closest_location = cell  
                     if closest_location is not None:  
                         seeker.set_target_location(closest_location) 
+                
             
         for obs in obstacles:
             obs.draw()
@@ -137,32 +138,7 @@ def movement(num_hiders, filename):
                 seeker.move_towards_target(announce)
                 pygame.time.wait(200)
             else:
-                random_list = ['Up', 'Down', 'Left', 'Right', 'Down_Left', 'Down_Right', 'Up_Left', 'Up_Right']
-                seeker_move = random.choice(random_list)
-                if seeker_move == 'Up':
-                    if seeker.is_valid_move((seeker.row - 1, seeker.col)):
-                        seeker.move_up()
-                elif seeker_move == 'Down':
-                    if seeker.is_valid_move((seeker.row + 1, seeker.col)):
-                        seeker.move_down()
-                elif seeker_move == 'Left':
-                    if seeker.is_valid_move((seeker.row, seeker.col - 1)):
-                        seeker.move_left()
-                elif seeker_move == 'Right':
-                    if seeker.is_valid_move((seeker.row, seeker.col + 1)):
-                        seeker.move_right()
-                elif seeker_move == 'Down_Left':
-                    if seeker.is_valid_move((seeker.row + 1, seeker.col - 1)):
-                        seeker.move_down_left()
-                elif seeker_move == 'Down_Right':
-                    if seeker.is_valid_move((seeker.row + 1, seeker.col + 1)):
-                        seeker.move_down_right()
-                elif seeker_move == 'Up_Left':
-                    if seeker.is_valid_move((seeker.row - 1, seeker.col - 1)):
-                        seeker.move_up_left()
-                elif seeker_move == 'Up_Right':
-                    if seeker.is_valid_move((seeker.row - 1, seeker.col + 1)):
-                        seeker.move_up_right()
+                seeker.random_move()
                 pygame.time.wait(200)
 
         seeker.character_vision(3)
