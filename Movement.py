@@ -81,6 +81,7 @@ def movement(num_hiders, filename):
         return min(len_p1, len_p2)
 
     while running:
+        print("May be hider: ", may_be_hider)
         clock.tick(FPS)
 
         win.fill(COLOR_WINDOW)
@@ -228,7 +229,10 @@ def movement(num_hiders, filename):
                 if may_be_hider[hider_check] == [-1, -1]:
                     may_be_hider[hider_check] = cell_list
                 else:
-                    may_be_hider[hider_check] = [cell for cell in may_be_hider[hider_check] if cell in cell_list]
+                    for square in may_be_hider[hider_check]:
+                        if square not in cell_list:
+                            may_be_hider[hider_check].remove(square)
+                            
                 hider_check += 1
                 announce.append(temp)
                 hider.announce_location_position.append(temp)
