@@ -148,16 +148,18 @@ def movement(num_hiders, filename):
 
         seeker.character_vision(3)
         if seeker.visible_cells is not None:
+            is_hider = False
             for cell in seeker.visible_cells:
                 for hider in hiders:
                     if hider.row == cell[0] and hider.col == cell[1]:
                         seeker.target_location = None
                         seeker.set_target_location((hider.row, hider.col))
                         seeker.hider_location = (hider.row, hider.col)
-                    else:
-                        for cell_list in may_be_hider:
-                            if cell in cell_list:
-                                cell_list.remove(cell)
+                        is_hider = True
+
+                for cell_list in may_be_hider:
+                    if not is_hider and cell in cell_list:
+                        cell_list.remove(cell)
         
         for hider in hiders:
             pygame.draw.rect(win, COLOR_HIDER, (hider.col * m.tile_size, hider.row * m.tile_size, m.tile_size, m.tile_size))
