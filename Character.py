@@ -328,6 +328,9 @@ class Seeker(Character):
             self.move_count += 1
      
     def find_path(self, start, goal):
+        if start == goal:
+            return [start]
+            
         frontier = []
         heapq.heappush(frontier, (0, start))
         came_from = {start: None}
@@ -347,7 +350,11 @@ class Seeker(Character):
                     heapq.heappush(frontier, (priority, next_node))
                     came_from[next_node] = current_node
 
+        if goal not in came_from:
+            return None  # No path found
+
         return self.reconstruct_path(came_from, goal)
+
     
     def cost(self, current, next):
         return 1
@@ -394,7 +401,6 @@ class Seeker(Character):
         if self.target_location is not None:
             # Use the A* algorithm to find the shortest path to the target
             path = self.find_path((self.row, self.col), self.target_location)
-
             # If a path was found, move to the next cell in the path
             if path:
                 next_cell = path[0]
