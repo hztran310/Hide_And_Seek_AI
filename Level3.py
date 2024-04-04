@@ -60,10 +60,12 @@ def run_level3():
     
     current_update = False
 
-    def distance(point1, point2):
-        return ((point1[0] - point2[0]) ** 2 + (point1[1] - point2[1]) ** 2) ** 0.5
+    def distance(cell1, cell2):
+        return abs(cell1[0] - cell2[0]) + abs(cell1[1] - cell2[1])
     
     current = 0
+    
+    new_announcement = False
 
     while running:
         clock.tick(FPS)
@@ -89,6 +91,15 @@ def run_level3():
         
         if announce is not None:
             if current == 0:
+                if seeker.target_location is not None and new_announcement == True:
+                    min = float('inf')
+                    res = []
+                    for announce_cell in announce:
+                        if distance((seeker.row, seeker.col), announce_cell) < min:
+                            min = distance((seeker.row, seeker.col), announce_cell)
+                            res = announce_cell
+                    seeker.set_target_location(res)
+                    new_announcement = False
                 if seeker.hider_location is None:
                     closest_distance = float('inf') 
                     closest_location = None  
@@ -215,6 +226,7 @@ def run_level3():
             
         if seeker.move_count == random_move:
             random_move = random.choice(list)
+            announce.clear()
             for hider in hiders:
                 cell_list = []
                 temp = hider.announce_location(3)
@@ -224,7 +236,10 @@ def run_level3():
                             cell_list.append((i, j))
                 announce.append(temp)
                 hider.announce_location_position.append(temp)
+            new_announcement = True
             seeker.move_count = 0
+            
+        print(announce)
         
         if current_update == True:
             if current == len(hiders):

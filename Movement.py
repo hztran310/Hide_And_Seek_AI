@@ -73,7 +73,11 @@ def movement(num_hiders, filename):
 
     def distance(p1, p2):
         len_p2 = len(seeker.find_path((seeker.row, seeker.col), (p2[0], p2[1])))
+        print('p2:', p2)
+        print('len_p2:', len_p2)
         len_p1 = len(seeker.find_path((seeker.row, seeker.col), (p1[0], p1[1])))
+        print('p1:', p1)
+        print('len_p1:', len_p1)
         return min(len_p1, len_p2)
 
     while running:
@@ -112,6 +116,7 @@ def movement(num_hiders, filename):
                                     closest_location = cell  
                     if closest_location is not None:  
                         seeker.set_target_location(closest_location) 
+        print('seeker.target_location:', seeker.target_location)    
                 
             
         for obs in obstacles:

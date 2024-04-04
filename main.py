@@ -22,7 +22,6 @@ def main_menu():
     level3_button = Button((247, 247, 240), 50, 450, 200, 80, 'Level 3')
     title = pygame.image.load('image/title.png')
     
-    
     # Set up the loop
     run = True
     back_to_main_menu = False
