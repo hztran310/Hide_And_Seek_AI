@@ -77,7 +77,6 @@ def movement(num_hiders, filename):
         return min(len_p1, len_p2)
 
     while running:
-        print(may_be_hider)
         clock.tick(FPS)
 
         win.fill(COLOR_WINDOW)
