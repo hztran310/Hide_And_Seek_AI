@@ -279,28 +279,46 @@ class Character:
             return 'Down_Right'
         elif self.row + 1 == neighbor[0] and self.col - 1 == neighbor[1]:
             return 'Down_Left'
-        
+    
+    def heuristic(self, cell1, cell2):
+        x1, y1 = cell1
+        x2, y2 = cell2
+        return abs(x1 - x2) + abs(y1 - y2)
+    
     def find_path(self, start, goal):
-        frontier = []
-        heapq.heappush(frontier, (0, start))
-        came_from = {start: None}
-        cost_so_far = {start: 0}
+        open_set = set()
+        closed_set = set()
+        came_from = {}
 
-        while frontier:
-            current_cost, current_node = heapq.heappop(frontier)
+        g_score = {start: 0}
+        f_score = {start: self.heuristic(start, goal)}
 
-            if current_node == goal:
-                break
+        open_set.add(start)
 
-            for next_node in self.neighbors(current_node):
-                new_cost = cost_so_far[current_node] + self.cost(current_node, next_node)
-                if next_node not in cost_so_far or new_cost < cost_so_far[next_node]:
-                    cost_so_far[next_node] = new_cost
-                    priority = new_cost
-                    heapq.heappush(frontier, (priority, next_node))
-                    came_from[next_node] = current_node
+        while open_set:
+            current = min(open_set, key=lambda node: f_score[node])
 
-        return self.reconstruct_path(came_from, goal)
+            if current == goal:
+                return self.reconstruct_path(came_from, goal)
+
+            open_set.remove(current)
+            closed_set.add(current)
+
+            for neighbor in self.neighbors(current):
+                tentative_g_score = g_score[current] + self.cost(current, neighbor)
+
+                if neighbor in closed_set and tentative_g_score >= g_score.get(neighbor, float('inf')):
+                    continue
+
+                if neighbor not in open_set or tentative_g_score < g_score.get(neighbor, float('inf')):
+                    came_from[neighbor] = current
+                    g_score[neighbor] = tentative_g_score
+                    f_score[neighbor] = tentative_g_score + self.heuristic(neighbor, goal)
+
+                    if neighbor not in open_set:
+                        open_set.add(neighbor)
+
+        return None
     
     def reconstruct_path(self, came_from, goal):
         current = goal

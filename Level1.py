@@ -12,7 +12,7 @@ start_button = ImageButton(start_img, 680, 250)
 exit_button = ImageButton(exit_img, 680, 350)
 
 def run_level1():
-    filename = 'Map/map1_1.txt'
+    filename = 'Map/Map2.txt'
     num_hiders = 1
     back_to_main_menu = movement(num_hiders, filename)
     return back_to_main_menu
