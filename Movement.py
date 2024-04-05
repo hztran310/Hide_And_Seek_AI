@@ -73,15 +73,10 @@ def movement(num_hiders, filename):
 
     def distance(p1, p2):
         len_p2 = len(seeker.find_path((seeker.row, seeker.col), (p2[0], p2[1])))
-        print('p2:', p2)
-        print('len_p2:', len_p2)
         len_p1 = len(seeker.find_path((seeker.row, seeker.col), (p1[0], p1[1])))
-        print('p1:', p1)
-        print('len_p1:', len_p1)
         return min(len_p1, len_p2)
 
     while running:
-        print("May be hider: ", may_be_hider)
         clock.tick(FPS)
 
         win.fill(COLOR_WINDOW)
@@ -117,7 +112,6 @@ def movement(num_hiders, filename):
                                     closest_location = cell  
                     if closest_location is not None:  
                         seeker.set_target_location(closest_location) 
-        print('seeker.target_location:', seeker.target_location)    
                 
             
         for obs in obstacles:
@@ -137,6 +131,9 @@ def movement(num_hiders, filename):
                 seeker.remove_obstacle()
 
         seeker.check_target_location_is_walkable()
+
+        for hider in hiders:
+            pygame.draw.rect(win, COLOR_HIDER, (hider.col * m.tile_size, hider.row * m.tile_size, m.tile_size, m.tile_size))
         
         
         if game_started == True:
@@ -148,6 +145,7 @@ def movement(num_hiders, filename):
                 pygame.time.wait(200)
 
         seeker.character_vision(3)
+        seeker.draw_character_vision()
         if seeker.visible_cells is not None:
             is_hider = False
             for cell in seeker.visible_cells:
@@ -162,8 +160,7 @@ def movement(num_hiders, filename):
                     if not is_hider and cell in cell_list:
                         cell_list.remove(cell)
         
-        for hider in hiders:
-            pygame.draw.rect(win, COLOR_HIDER, (hider.col * m.tile_size, hider.row * m.tile_size, m.tile_size, m.tile_size))
+        
                         
         pygame.draw.rect(win, COLOR_SEEKER, (seeker.col * m.tile_size, seeker.row * m.tile_size, m.tile_size, m.tile_size))
 

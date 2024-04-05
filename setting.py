@@ -5,7 +5,7 @@ pygame.init()
 
 WIDTH, HEIGHT = 800, 640
 FPS = 60
-
+#win = fullsreen
 win = pygame.display.set_mode((WIDTH, HEIGHT))
 
 COLOR_HIDER = (0, 0, 255)
