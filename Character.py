@@ -407,7 +407,6 @@ class Seeker(Character):
         if self.target_location is not None:
             # Use the A* algorithm to find the shortest path to the target
             path = self.find_path((self.row, self.col), self.target_location)
-
             # If a path was found, move to the next cell in the path
             if path:
                 next_cell = path[0]
