@@ -1,5 +1,6 @@
 from Level1 import run_level1
 from Level2 import run_level2
+from Level3 import run_level3
 from setting import *
 from Button import Button
 
@@ -16,10 +17,10 @@ def main_menu():
     font = pygame.font.SysFont('comicsans', 60)
     
     # Set up the buttons
-    level1_button = Button((246, 219, 110), 50, 50, 200, 100, 'Level 1')
-    level2_button = Button((247, 247, 240), 50, 200, 200, 100, 'Level 2')
+    level1_button = Button((246, 219, 110), 50, 150, 200, 80, 'Level 1')
+    level2_button = Button((247, 247, 240), 50, 300, 200, 80, 'Level 2')
+    level3_button = Button((247, 247, 240), 50, 450, 200, 80, 'Level 3')
     title = pygame.image.load('image/title.png')
-    
     
     # Set up the loop
     run = True
@@ -27,9 +28,10 @@ def main_menu():
     while run:
         clock.tick(FPS)
         win.fill(COLOR_WINDOW)
-        win.blit(title, (150, 40))
-        level1_button.draw(win, index=0, total_buttons=2, gap=10)
-        level2_button.draw(win, index=1, total_buttons=2, gap=10)
+        level1_button.draw(win, index=0, total_buttons=3, gap=10)
+        level2_button.draw(win, index=1, total_buttons=3, gap=10)
+        level3_button.draw(win, index=2, total_buttons=3, gap=10)
+        win.blit(title, (150, 5))
         pygame.display.update()
         for event in pygame.event.get():
             pos = pygame.mouse.get_pos()
@@ -44,6 +46,11 @@ def main_menu():
                     back_to_main_menu = run_level2()
                     if back_to_main_menu == True:
                         continue
+                if level3_button.isOver(pos):
+                    back_to_main_menu = run_level3()
+                    if back_to_main_menu == True:
+                        continue
+
 
     pygame.quit()
 

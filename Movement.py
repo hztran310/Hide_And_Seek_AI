@@ -73,10 +73,15 @@ def movement(num_hiders, filename):
 
     def distance(p1, p2):
         len_p2 = len(seeker.find_path((seeker.row, seeker.col), (p2[0], p2[1])))
+        print('p2:', p2)
+        print('len_p2:', len_p2)
         len_p1 = len(seeker.find_path((seeker.row, seeker.col), (p1[0], p1[1])))
+        print('p1:', p1)
+        print('len_p1:', len_p1)
         return min(len_p1, len_p2)
 
     while running:
+        print("May be hider: ", may_be_hider)
         clock.tick(FPS)
 
         win.fill(COLOR_WINDOW)
@@ -112,6 +117,8 @@ def movement(num_hiders, filename):
                                     closest_location = cell  
                     if closest_location is not None:  
                         seeker.set_target_location(closest_location) 
+        print('seeker.target_location:', seeker.target_location)    
+                
             
         for obs in obstacles:
             obs.draw()
@@ -137,46 +144,25 @@ def movement(num_hiders, filename):
                 seeker.move_towards_target(announce)
                 pygame.time.wait(200)
             else:
-                random_list = ['Up', 'Down', 'Left', 'Right', 'Down_Left', 'Down_Right', 'Up_Left', 'Up_Right']
-                seeker_move = random.choice(random_list)
-                if seeker_move == 'Up':
-                    if seeker.is_valid_move((seeker.row - 1, seeker.col)):
-                        seeker.move_up()
-                elif seeker_move == 'Down':
-                    if seeker.is_valid_move((seeker.row + 1, seeker.col)):
-                        seeker.move_down()
-                elif seeker_move == 'Left':
-                    if seeker.is_valid_move((seeker.row, seeker.col - 1)):
-                        seeker.move_left()
-                elif seeker_move == 'Right':
-                    if seeker.is_valid_move((seeker.row, seeker.col + 1)):
-                        seeker.move_right()
-                elif seeker_move == 'Down_Left':
-                    if seeker.is_valid_move((seeker.row + 1, seeker.col - 1)):
-                        seeker.move_down_left()
-                elif seeker_move == 'Down_Right':
-                    if seeker.is_valid_move((seeker.row + 1, seeker.col + 1)):
-                        seeker.move_down_right()
-                elif seeker_move == 'Up_Left':
-                    if seeker.is_valid_move((seeker.row - 1, seeker.col - 1)):
-                        seeker.move_up_left()
-                elif seeker_move == 'Up_Right':
-                    if seeker.is_valid_move((seeker.row - 1, seeker.col + 1)):
-                        seeker.move_up_right()
+                seeker.random_move()
                 pygame.time.wait(200)
 
         seeker.character_vision(3)
         if seeker.visible_cells is not None:
+            is_hider = False
             for cell in seeker.visible_cells:
                 for hider in hiders:
                     if hider.row == cell[0] and hider.col == cell[1]:
                         seeker.target_location = None
                         seeker.set_target_location((hider.row, hider.col))
                         seeker.hider_location = (hider.row, hider.col)
-                    else:
-                        for cell_list in may_be_hider:
-                            if cell in cell_list:
-                                cell_list.remove(cell)
+                        is_hider = True
+
+                for cell_list in may_be_hider:
+                    if not is_hider and cell in cell_list:
+                        cell_list.remove(cell)
+                        
+        seeker.draw_character_vision()
         
         for hider in hiders:
             pygame.draw.rect(win, COLOR_HIDER, (hider.col * m.tile_size, hider.row * m.tile_size, m.tile_size, m.tile_size))
@@ -245,7 +231,10 @@ def movement(num_hiders, filename):
                 if may_be_hider[hider_check] == [-1, -1]:
                     may_be_hider[hider_check] = cell_list
                 else:
-                    may_be_hider[hider_check] = [cell for cell in may_be_hider[hider_check] if cell in cell_list]
+                    for square in may_be_hider[hider_check]:
+                        if square not in cell_list:
+                            may_be_hider[hider_check].remove(square)
+                            
                 hider_check += 1
                 announce.append(temp)
                 hider.announce_location_position.append(temp)
