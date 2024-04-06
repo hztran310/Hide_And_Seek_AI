@@ -42,6 +42,8 @@ def movement(num_hiders, filename):
         hider.color = COLOR_HIDER
         
     # Set the initial positions of the characters
+
+    may_be_hider = [[-1, -1] for i in range(num_hiders)]
     seeker.set_position()
     initial_hider_position = []
     if num_hiders == 1:
@@ -57,6 +59,7 @@ def movement(num_hiders, filename):
     list = [5, 6, 7, 8, 9, 10]
     random_move = random.choice(list)
 
+
     list_obstacles = m.get_obstacles()
     obstacles = []
     for i in range(0, len(list_obstacles), 4):
@@ -66,22 +69,15 @@ def movement(num_hiders, filename):
     announce = []
     
     back_to_main_menu = False
-
-    may_be_hider = [[-1, -1], [-1, -1]]
     
     tmp_num_hiders = num_hiders
 
     def distance(p1, p2):
         len_p2 = len(seeker.find_path((seeker.row, seeker.col), (p2[0], p2[1])))
-        print('p2:', p2)
-        print('len_p2:', len_p2)
         len_p1 = len(seeker.find_path((seeker.row, seeker.col), (p1[0], p1[1])))
-        print('p1:', p1)
-        print('len_p1:', len_p1)
         return min(len_p1, len_p2)
 
     while running:
-        print("May be hider: ", may_be_hider)
         clock.tick(FPS)
 
         win.fill(COLOR_WINDOW)
@@ -117,7 +113,6 @@ def movement(num_hiders, filename):
                                     closest_location = cell  
                     if closest_location is not None:  
                         seeker.set_target_location(closest_location) 
-        print('seeker.target_location:', seeker.target_location)    
                 
             
         for obs in obstacles:
@@ -142,10 +137,10 @@ def movement(num_hiders, filename):
         if game_started == True:
             if seeker.target_location is not None:
                 seeker.move_towards_target(announce)
-                pygame.time.wait(200)
+                pygame.time.wait(100)
             else:
                 seeker.random_move()
-                pygame.time.wait(200)
+                pygame.time.wait(100)
 
         seeker.character_vision(3)
         if seeker.visible_cells is not None:

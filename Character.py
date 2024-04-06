@@ -482,13 +482,18 @@ class Hider(Character):
     def find_farthest_location(self, point):
         max_distance = float('-inf')
         farthest_location = None
-        for i in range(len(self.map_data)):
-            for j in range(len(self.map_data[i])):
-                if self.map_data[i][j] == '0':
-                    distance_to_target = self.distance(point, (i, j))
-                    if distance_to_target > max_distance:
-                        max_distance = distance_to_target
-                        farthest_location = (i, j)
+        start_row = max(0, self.row - 10)
+        end_row = min(len(self.map_data), self.row + 11)
+        start_col = max(0, self.col - 10)
+        end_col = min(len(self.map_data[0]), self.col + 11)
+        for i in range(start_row, end_row):
+            for j in range(start_col, end_col):
+                if self.map_data[i][j] != '0':
+                    continue
+                distance_to_target = self.distance(point, (i, j))
+                if distance_to_target > max_distance:
+                    max_distance = distance_to_target
+                    farthest_location = (i, j)
         return farthest_location
         
     def move_towards_target(self):

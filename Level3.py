@@ -161,17 +161,17 @@ def run_level3():
                 if seeker.target_location is not None:
                     seeker.move_towards_target(announce)
                     current_update = True
-                    pygame.time.wait(500)
+                    pygame.time.wait(100)
                 else:
                     seeker.random_move()
-                    pygame.time.wait(200)
+                    pygame.time.wait(100)
             else:
                 hider = hiders[current - 1]
                 if hider.announce_location_position is not None:
                     if hider.target_location is not None:
                         hider.move_towards_target()
                         current_update = True
-                        pygame.time.wait(500)
+                        pygame.time.wait(100)
                             
                     
         seeker.character_vision(3)
