@@ -141,6 +141,12 @@ def run_level3():
                 seeker.reset_map_data()
                 seeker.remove_obstacle()
             
+            if [hider.obstacle for hider in hiders] == [None for i in range(num_hiders)]:
+                for hider in hiders:
+                    hider.set_obstacle(obs)
+                    hider.reset_map_data()
+                    hider.remove_obstacle()
+            
             if seeker.can_pick_obstacle():
                 key = pygame.key.get_pressed()
                 if key[pygame.K_g]:
