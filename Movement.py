@@ -161,6 +161,8 @@ def movement(num_hiders, filename):
                 for cell_list in may_be_hider:
                     if not is_hider and cell in cell_list:
                         cell_list.remove(cell)
+                        
+        seeker.draw_character_vision()
         
         for hider in hiders:
             pygame.draw.rect(win, COLOR_HIDER, (hider.col * m.tile_size, hider.row * m.tile_size, m.tile_size, m.tile_size))
