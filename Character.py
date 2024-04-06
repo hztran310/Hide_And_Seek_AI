@@ -528,18 +528,17 @@ class Hider(Character):
                 self.target_location = None
                 
     def move_when_saw_seeker(self, seeker_row, seeker_col):
-        directions = [(0, -1), (-1, -1), (1, -1), (-1, 0), (1, 0), (0, 1), (-1, 1), (1, 1)]
-        random_list = []
+        diagonal_directions = [(-1, -1), (1, -1), (-1, 1), (1, 1)]
+        straight_directions = [(0, -1), (-1, 0), (1, 0), (0, 1)]
 
-        for dx, dy in directions:
-            new_row, new_col = self.row + dx, self.col + dy
-            if (self.row - seeker_row) * dx >= 0 and (self.col - seeker_col) * dy >= 0:
-                random_list.append((new_row, new_col))
+        for directions in [diagonal_directions, straight_directions]:
+            random.shuffle(directions)  # Shuffle the list to ensure random selection within the same priority level
+            for dx, dy in directions:
+                new_row, new_col = self.row + dx, self.col + dy
+                if (self.row - seeker_row) * dx >= 0 and (self.col - seeker_col) * dy >= 0:
+                    move = (new_row, new_col)
+                    if (0 <= move[0] < len(self.map_data) and 0 <= move[1] < len(self.map_data[0]) 
+                        and self.is_valid_move(move) and (move[0] != seeker_row or move[1] != seeker_col)):
+                        return move
 
-        while random_list:
-            move = random.choice(random_list)
-            if (0 <= move[0] < len(self.map_data) and 0 <= move[1] < len(self.map_data[0]) 
-                and self.is_valid_move(move) and (move[0] != seeker_row or move[1] != seeker_col)):
-                return move
-            else:
-                random_list.remove(move)
+        return None  # Return None if no valid move is found
