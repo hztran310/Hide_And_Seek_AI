@@ -201,9 +201,13 @@ class Character:
                 if not (new_x == x and new_y == y) and color != (COLOR_WALL[0], COLOR_WALL[1], COLOR_WALL[2], 255) and color != (COLOR_OBS[0], COLOR_OBS[1], COLOR_OBS[2], 255):
                     if self.has_line_of_sight((x, y), (new_x, new_y)):
                         self.visible_cells.append((new_x, new_y))
-                        pygame.draw.rect(self.win, COLOR_VIEW, (new_y * self.tile_size, new_x * self.tile_size, self.tile_size, self.tile_size))
 
         return self.visible_cells
+    
+    def draw_character_vision(self):
+        if self.visible_cells is not None:
+            for cell in self.visible_cells:
+                pygame.draw.rect(self.win, COLOR_VIEW, (cell[1] * self.tile_size, cell[0] * self.tile_size, self.tile_size, self.tile_size))
     
     def has_line_of_sight(self, start, end):
         points = self.bresenham(start, end)
@@ -524,70 +528,18 @@ class Hider(Character):
                 self.target_location = None
                 
     def move_when_saw_seeker(self, seeker_row, seeker_col):
-        if seeker_row < self.row:
-            randomList = ['Down_Left', 'Down_Right', 'Down', 'Left', 'Right']
-            while True:
-                move = random.choice(randomList)
-                if move == 'Down_Left' and self.is_valid_move((self.row + 1, self.col - 1)):
-                    return (self.row + 1, self.col - 1)
-                elif move == 'Down_Right' and self.is_valid_move((self.row + 1, self.col + 1)):
-                    return (self.row + 1, self.col + 1)
-                elif move == 'Down' and self.is_valid_move((self.row + 1, self.col)):
-                    return (self.row + 1, self.col)
-                elif move == 'Left' and self.is_valid_move((self.row, self.col - 1)):
-                    return (self.row + 1, self.col)
-                elif move == 'Right' and self.is_valid_move((self.row, self.col + 1)):
-                    self.move_right()
-                    break
-        elif seeker_row > self.row:
-            randomList = ['Up_Left', 'Up_Right', 'Up', 'Left', 'Right']
-            while True:
-                move = random.choice(randomList)
-                if move == 'Up_Left' and self.is_valid_move((self.row - 1, self.col - 1)):
-                    return (self.row + 1, self.col)
-                elif move == 'Up_Right' and self.is_valid_move((self.row - 1, self.col + 1)):
-                    return (self.row + 1, self.col)
-                elif move == 'Up' and self.is_valid_move((self.row - 1, self.col)):
-                    return (self.row + 1, self.col)
-                elif move == 'Left' and self.is_valid_move((self.row, self.col - 1)):
-                   return (self.row + 1, self.col)
-                elif move == 'Right' and self.is_valid_move((self.row, self.col + 1)):
-                    return (self.row + 1, self.col)
-        elif seeker_col < self.col:
-            randomList = ['Up_Right', 'Down_Right', 'Right', 'Up', 'Down']
-            while True:
-                move = random.choice(randomList)
-                if move == 'Up_Right' and self.is_valid_move((self.row - 1, self.col + 1)):
-                    return (self.row + 1, self.col)
-                elif move == 'Down_Right' and self.is_valid_move((self.row + 1, self.col + 1)):
-                    return (self.row + 1, self.col)
-                elif move == 'Right' and self.is_valid_move((self.row, self.col + 1)):
-                    return (self.row + 1, self.col)
-                elif move == 'Up' and self.is_valid_move((self.row - 1, self.col)):
-                    return (self.row + 1, self.col)
-                elif move == 'Down' and self.is_valid_move((self.row + 1, self.col)):
-                    return (self.row + 1, self.col)
-        elif seeker_col > self.col:
-            randomList = ['Up_Left', 'Down_Left', 'Left', 'Up', 'Down']
-            while True:
-                move = random.choice(randomList)
-                if move == 'Up_Left' and self.is_valid_move((self.row - 1, self.col - 1)):
-                    return (self.row + 1, self.col)
-                elif move == 'Down_Left' and self.is_valid_move((self.row + 1, self.col - 1)):
-                    return (self.row + 1, self.col)
-                elif move == 'Left' and self.is_valid_move((self.row, self.col - 1)):
-                    return (self.row + 1, self.col)
-                elif move == 'Up' and self.is_valid_move((self.row - 1, self.col)):
-                    return (self.row + 1, self.col)
-                elif move == 'Down' and self.is_valid_move((self.row + 1, self.col)):
-                    return (self.row + 1, self.col)
-            
-            
-                
-            
-    
-            
-                
-                
-                    
-            
+        directions = [(0, -1), (-1, -1), (1, -1), (-1, 0), (1, 0), (0, 1), (-1, 1), (1, 1)]
+        random_list = []
+
+        for dx, dy in directions:
+            new_row, new_col = self.row + dx, self.col + dy
+            if (self.row - seeker_row) * dx >= 0 and (self.col - seeker_col) * dy >= 0:
+                random_list.append((new_row, new_col))
+
+        while random_list:
+            move = random.choice(random_list)
+            if (0 <= move[0] < len(self.map_data) and 0 <= move[1] < len(self.map_data[0]) 
+                and self.is_valid_move(move) and (move[0] != seeker_row or move[1] != seeker_col)):
+                return move
+            else:
+                random_list.remove(move)

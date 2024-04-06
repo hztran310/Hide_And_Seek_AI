@@ -88,6 +88,7 @@ def run_level3():
                 if exit_button.isOver(pos):
                     running = False
                     back_to_main_menu = True
+                    
         
         if announce is not None:
             if current == 0:
@@ -114,6 +115,24 @@ def run_level3():
                 if hider.target_location is None:
                     target = hider.find_farthest_location((hider.row, hider.col))
                     hider.set_target_location(target)
+        
+        if current == 0:
+            seeker.character_vision(3)
+            if seeker.visible_cells is not None:
+                for cell in seeker.visible_cells:
+                    for hider in hiders:
+                        if hider.row == cell[0] and hider.col == cell[1]:
+                            seeker.target_location = None
+                            seeker.set_target_location((hider.row, hider.col))
+                            seeker.hider_location = (hider.row, hider.col)
+        else:
+            hider = hiders[current - 1]
+            hider.character_vision(2)
+            if hider.visible_cells is not None:
+                for cell in hider.visible_cells:
+                    if seeker.row == cell[0] and seeker.col == cell[1]:
+                        hider.target_location = None
+                        hider.set_target_location(hider.move_when_saw_seeker(seeker.row, seeker.col))
             
         for obs in obstacles:
             obs.draw()
@@ -142,7 +161,7 @@ def run_level3():
                 if seeker.target_location is not None:
                     seeker.move_towards_target(announce)
                     current_update = True
-                    pygame.time.wait(1000)
+                    pygame.time.wait(500)
                 else:
                     seeker.random_move()
                     pygame.time.wait(200)
@@ -152,30 +171,22 @@ def run_level3():
                     if hider.target_location is not None:
                         hider.move_towards_target()
                         current_update = True
-                        pygame.time.wait(200)
+                        pygame.time.wait(500)
                             
-        if current == 0:
-            seeker.character_vision(3)
-            if seeker.visible_cells is not None:
-                for cell in seeker.visible_cells:
-                    for hider in hiders:
-                        if hider.row == cell[0] and hider.col == cell[1]:
-                            seeker.target_location = None
-                            seeker.set_target_location((hider.row, hider.col))
-                            seeker.hider_location = (hider.row, hider.col)
-        else:
-            hider = hiders[current - 1]
+                    
+        seeker.character_vision(3)
+            
+        seeker.draw_character_vision()
+        
+        for hider in hiders:
             hider.character_vision(2)
-            if hider.visible_cells is not None:
-                for cell in hider.visible_cells:
-                    if seeker.row == cell[0] and seeker.col == cell[1]:
-                        hider.target_location = None
-                        hider.set_target_location(hider.move_when_saw_seeker(seeker.row, seeker.col))
-                        
+            hider.draw_character_vision()
+                                
         for hider in hiders:
             pygame.draw.rect(win, COLOR_HIDER, (hider.col * m.tile_size, hider.row * m.tile_size, m.tile_size, m.tile_size))
-                        
+            
         pygame.draw.rect(win, COLOR_SEEKER, (seeker.col * m.tile_size, seeker.row * m.tile_size, m.tile_size, m.tile_size))
+
 
         SCORE_TEXT = SCORE_FONT.render(f'Score: {seeker.score}', True, (0, 0, 0))  # Create a text surface with the score
         win.blit(SCORE_TEXT, [0,0])   
@@ -228,19 +239,12 @@ def run_level3():
             random_move = random.choice(list)
             announce.clear()
             for hider in hiders:
-                cell_list = []
                 temp = hider.announce_location(3)
-                for i in range(temp[0] - 3, temp[0] + 4):
-                    for j in range(temp[1] - 3, temp[1] + 4):
-                        if i >= 0 and i < len(seeker.map_data) and j >= 0 and j < len(seeker.map_data[0]) and seeker.map_data[i][j] != '1' and seeker.map_data[i][j] != '4':
-                            cell_list.append((i, j))
                 announce.append(temp)
                 hider.announce_location_position.append(temp)
             new_announcement = True
             seeker.move_count = 0
-            
-        print(announce)
-        
+                    
         if current_update == True:
             if current == len(hiders):
                 current = 0
