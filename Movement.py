@@ -73,9 +73,8 @@ def movement(num_hiders, filename):
     tmp_num_hiders = num_hiders
 
     def distance(p1, p2):
-        len_p2 = len(seeker.find_path((seeker.row, seeker.col), (p2[0], p2[1])))
-        len_p1 = len(seeker.find_path((seeker.row, seeker.col), (p1[0], p1[1])))
-        return min(len_p1, len_p2)
+        dist = len(seeker.find_path((p1[0], p1[1]), (p2[0], p2[1])))
+        return dist
 
     while running:
         clock.tick(FPS)
@@ -110,11 +109,10 @@ def movement(num_hiders, filename):
                                 dist = distance((seeker.row, seeker.col), cell)  
                                 if dist < closest_distance:  
                                     closest_distance = dist
-                                    closest_location = cell  
+                                    closest_location = cell 
                     if closest_location is not None:  
                         seeker.set_target_location(closest_location) 
                 
-            
         for obs in obstacles:
             obs.draw()
             if seeker.obstacle is None:
@@ -132,7 +130,6 @@ def movement(num_hiders, filename):
                 seeker.remove_obstacle()
 
         seeker.check_target_location_is_walkable()
-        
         
         if game_started == True:
             if seeker.target_location is not None:
