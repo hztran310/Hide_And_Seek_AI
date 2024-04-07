@@ -90,6 +90,12 @@ def run_level3():
                 if exit_button.isOver(pos):
                     running = False
                     back_to_main_menu = True
+            # Handle button click event throughout the game loop
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                pos = pygame.mouse.get_pos()
+                if exit_button.isOver(pos):
+                    running = False
+                    back_to_main_menu = True
                     
         
         if announce is not None:
