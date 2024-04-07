@@ -78,6 +78,9 @@ def movement(num_hiders, filename):
 
     while running:
         clock.tick(FPS)
+        
+        print('seeker target location: ', seeker.target_location)
+
 
         win.fill(COLOR_WINDOW)
         m.draw()
@@ -106,7 +109,7 @@ def movement(num_hiders, filename):
         
         if game_started == True:
             if announce is not None:
-                if seeker.hider_location is None:
+                if seeker.hider_location is None or seeker.target_location is None:
                     closest_distance = float('inf') 
                     closest_location = None  
                     for cell_list in may_be_hider:

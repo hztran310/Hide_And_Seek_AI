@@ -535,14 +535,20 @@ class Hider(Character):
         diagonal_directions = [(-1, -1), (1, -1), (-1, 1), (1, 1)]
         straight_directions = [(0, -1), (-1, 0), (1, 0), (0, 1)]
 
-        for directions in [diagonal_directions, straight_directions]:
-            random.shuffle(directions)  # Shuffle the list to ensure random selection within the same priority level
-            for dx, dy in directions:
-                new_row, new_col = self.row + dx, self.col + dy
-                if (self.row - seeker_row) * dx >= 0 and (self.col - seeker_col) * dy >= 0:
-                    move = (new_row, new_col)
-                    if (0 <= move[0] < len(self.map_data) and 0 <= move[1] < len(self.map_data[0]) 
-                        and self.is_valid_move(move) and (move[0] != seeker_row or move[1] != seeker_col)):
-                        return move
-
-        return None  # Return None if no valid move is found
+        while True:
+            if diagonal_directions is None:
+                move = random.choice(straight_directions)
+                new_row = self.row + move[0]
+                new_col = self.col + move[1]
+                if self.is_valid_move((new_row, new_col)) and (new_row, new_col) != (seeker_row, seeker_col):
+                    return (new_row, new_col)
+                else:
+                    straight_directions.remove(move)
+            else:
+                move = random.choice(diagonal_directions)
+                new_row = self.row + move[0]
+                new_col = self.col + move[1]
+                if self.is_valid_move((new_row, new_col)) and (new_row, new_col) != (seeker_row, seeker_col):
+                    return (new_row, new_col)
+                else:
+                    diagonal_directions.remove(move)
