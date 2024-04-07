@@ -21,9 +21,17 @@ def run_level3():
     game_over = False
     
     # Create the map
-    m = MAP('Map/map2.txt', win)
+    m = MAP('Map/map3.txt', win)
     
-    num_hiders = 2
+    # Set the number of hiders
+    num_hiders = 0
+    with open('Map/map3.txt', 'r') as file:
+        rows, cols = map(int, file.readline().split()) 
+        for i in range(rows):
+            line = file.readline().strip()
+            for j in range(cols):
+                if line[j] == '2':
+                    num_hiders += 1
     
     # Create the characters
     seeker = Seeker(m, win)
@@ -66,6 +74,8 @@ def run_level3():
     current = 0
     
     new_announcement = False
+    
+    has_announce = False
 
     while running:
         clock.tick(FPS)
@@ -92,7 +102,7 @@ def run_level3():
         
         if announce is not None:
             if current == 0:
-                if seeker.target_location is not None and new_announcement == True:
+                if seeker.target_location is not None and new_announcement == True or seeker.hider_location is None:
                     min = float('inf')
                     res = []
                     for announce_cell in announce:
@@ -101,15 +111,6 @@ def run_level3():
                             res = announce_cell
                     seeker.set_target_location(res)
                     new_announcement = False
-                if seeker.hider_location is None:
-                    closest_distance = float('inf') 
-                    closest_location = None  
-                    for cell in announce:
-                        if distance((seeker.row, seeker.col), cell) < closest_distance:
-                            closest_distance = distance((seeker.row, seeker.col), cell)
-                            closest_location = cell
-                    if closest_location is not None:  
-                        seeker.set_target_location(closest_location)
             else:
                 hider = hiders[current - 1]
                 if hider.target_location is None:
@@ -170,6 +171,8 @@ def run_level3():
                     pygame.time.wait(100)
                 else:
                     seeker.random_move()
+                    if has_announce == True:
+                        current_update = True
                     pygame.time.wait(100)
             else:
                 hider = hiders[current - 1]
@@ -242,6 +245,7 @@ def run_level3():
                     pygame.time.wait(2000)  # Wait for 3 seconds
             
         if seeker.move_count == random_move:
+            has_announce = True
             random_move = random.choice(list)
             announce.clear()
             for hider in hiders:
