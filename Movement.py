@@ -78,9 +78,6 @@ def movement(num_hiders, filename):
 
     while running:
         clock.tick(FPS)
-        
-        print('seeker target location: ', seeker.target_location)
-
 
         win.fill(COLOR_WINDOW)
         m.draw()
@@ -107,6 +104,7 @@ def movement(num_hiders, filename):
                     running = False
                     back_to_main_menu = True
         
+        print('announce:', announce)
         if game_started == True:
             if announce is not None:
                 if seeker.hider_location is None or seeker.target_location is None:
@@ -115,13 +113,24 @@ def movement(num_hiders, filename):
                     for cell_list in may_be_hider:
                         if cell_list != [-1, -1]:
                             for cell in cell_list:
+                                if cell == (seeker.row, seeker.col):
+                                    continue
                                 dist = distance((seeker.row, seeker.col), cell)  
                                 if dist < closest_distance:  
                                     closest_distance = dist
                                     closest_location = cell 
                     if closest_location is not None:  
-                        seeker.set_target_location(closest_location) 
-                
+                        seeker.set_target_location(closest_location)
+                if closest_location is None:
+                    closest_distance = float('inf')
+                    closest_location = None
+                    for announce_location in announce:
+                        dist = distance((seeker.row, seeker.col), announce_location)
+                        if dist < closest_distance:
+                            closest_distance = dist
+                            closest_location = announce_location
+                    seeker.set_target_location(closest_location)
+                                
         for obs in obstacles:
             obs.draw()
             if seeker.obstacle is None:
@@ -138,15 +147,17 @@ def movement(num_hiders, filename):
             else:
                 seeker.remove_obstacle()
 
-        seeker.check_target_location_is_walkable()
-        
+        # seeker.check_target_location_is_walkable()
+
+
         if game_started == True:
-            if seeker.target_location is not None:
+            if seeker.target_location is not None and seeker.target_location != (seeker.row, seeker.col):
                 seeker.move_towards_target(announce)
                 pygame.time.wait(100)
             else:
                 seeker.random_move()
                 pygame.time.wait(100)
+                
 
         seeker.character_vision(3)
         if seeker.visible_cells is not None:
@@ -182,6 +193,7 @@ def movement(num_hiders, filename):
                 for cell in cell_list:
                     if cell == (seeker.row, seeker.col):
                         may_be_hider.remove(cell_list)
+        
 
             tmp_num_hiders -= 1
             win.fill(COLOR_FLOOR, pygame.Rect(0, 0, SCORE_TEXT.get_width(), SCORE_TEXT.get_height()))  # Fill the area with white color
@@ -229,12 +241,13 @@ def movement(num_hiders, filename):
                         if i >= 0 and i < len(seeker.map_data) and j >= 0 and j < len(seeker.map_data[0]) and seeker.map_data[i][j] != '1' and seeker.map_data[i][j] != '4':
                             cell_list.append((i, j))
 
-                if may_be_hider[hider_check] == [-1, -1]:
-                    may_be_hider[hider_check] = cell_list
-                else:
-                    for square in may_be_hider[hider_check]:
-                        if square not in cell_list:
-                            may_be_hider[hider_check].remove(square)
+                if hider_check < len(may_be_hider):
+                    if may_be_hider[hider_check] == [-1, -1]:
+                        may_be_hider[hider_check] = cell_list
+                    else:
+                        for square in may_be_hider[hider_check]:
+                            if square not in cell_list:
+                                may_be_hider[hider_check].remove(square)
                             
                 hider_check += 1
                 announce.append(temp)
