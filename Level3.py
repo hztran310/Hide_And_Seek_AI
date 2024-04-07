@@ -66,6 +66,8 @@ def run_level3():
     current = 0
     
     new_announcement = False
+    
+    has_announce = False
 
     while running:
         clock.tick(FPS)
@@ -170,6 +172,8 @@ def run_level3():
                     pygame.time.wait(100)
                 else:
                     seeker.random_move()
+                    if has_announce == True:
+                        current_update = True
                     pygame.time.wait(100)
             else:
                 hider = hiders[current - 1]
@@ -242,6 +246,7 @@ def run_level3():
                     pygame.time.wait(2000)  # Wait for 3 seconds
             
         if seeker.move_count == random_move:
+            has_announce = True
             random_move = random.choice(list)
             announce.clear()
             for hider in hiders:
