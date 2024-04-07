@@ -21,7 +21,7 @@ def run_level3():
     game_over = False
     
     # Create the map
-    m = MAP('Map/map2.txt', win)
+    m = MAP('Map/Map5.txt', win)
     
     num_hiders = 2
     
