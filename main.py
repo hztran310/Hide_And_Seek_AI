@@ -17,9 +17,9 @@ def main_menu():
     font = pygame.font.SysFont('comicsans', 60)
     
     # Set up the buttons
-    level1_button = Button((246, 219, 110), 50, 150, 200, 80, 'Level 1')
-    level2_button = Button((247, 247, 240), 50, 300, 200, 80, 'Level 2')
-    level3_button = Button((247, 247, 240), 50, 450, 200, 80, 'Level 3')
+    level1_button = Button((241, 238, 220), 50, 150, 200, 80, 'Level 1')
+    level2_button = Button((241, 238, 220), 50, 300, 200, 80, 'Level 2')
+    level3_button = Button((241, 238, 220), 50, 450, 200, 80, 'Level 3')
     title = pygame.image.load('image/title.png')
     
     # Set up the loop

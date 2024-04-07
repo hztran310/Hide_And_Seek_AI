@@ -40,7 +40,7 @@ class Character:
     def reset_map_data(self):
         for i, row in enumerate(self.map_data):
             for j, col in enumerate(row):
-                if col == '4' or col == '3' or col == '2':
+                if col == '3' or col == '2':
                     self.map_data[i][j] = '0'
 
         if self.obstacle is not None or self.can_pick_obstacle():
