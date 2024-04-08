@@ -182,7 +182,7 @@ def movement(num_hiders, filename):
         pygame.draw.rect(win, COLOR_SEEKER, (seeker.col * m.tile_size, seeker.row * m.tile_size, m.tile_size, m.tile_size))
 
         SCORE_TEXT = SCORE_FONT.render(f'Score: {seeker.score}', True, (0, 0, 0))  # Create a text surface with the score
-        win.blit(SCORE_TEXT, [0,0])   
+        win.blit(SCORE_TEXT, [680,0])   
         
         # Update the display
         pygame.display.update()
@@ -196,10 +196,10 @@ def movement(num_hiders, filename):
         
 
             tmp_num_hiders -= 1
-            win.fill(COLOR_FLOOR, pygame.Rect(0, 0, SCORE_TEXT.get_width(), SCORE_TEXT.get_height()))  # Fill the area with white color
+            win.fill(COLOR_WINDOW, pygame.Rect(680, 0, SCORE_TEXT.get_width(), SCORE_TEXT.get_height()))  # Fill the area with white color
             pygame.display.update()
             SCORE_TEXT = SCORE_FONT.render(f'Score: {seeker.score}', True, (0, 0, 0))  # Create a text surface with the score
-            win.blit(SCORE_TEXT, [0,0])
+            win.blit(SCORE_TEXT, [680,0])
             if tmp_num_hiders == 0:
                 game_over = True
                 win.fill(COLOR_FLOOR, pygame.Rect(0, 0, TEXT_HIDER_FOUND.get_width(), TEXT_HIDER_FOUND.get_height()))  # Fill the area with white color
@@ -256,7 +256,7 @@ def movement(num_hiders, filename):
 
 
         SCORE_TEXT = SCORE_FONT.render(f'Score: {seeker.score}', True, (0, 0, 0))  # Create a text surface with the score
-        win.blit(SCORE_TEXT, [0,0])   
+        win.blit(SCORE_TEXT, [680,0])   
         
         # Update the display
         pygame.display.update()
