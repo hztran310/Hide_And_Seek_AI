@@ -4,6 +4,7 @@ from Level3 import run_level3
 from setting import *
 from Button import Button
 
+
 def main_menu():
     # Initialize Pygame
     pygame.init()
