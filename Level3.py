@@ -205,7 +205,7 @@ def run_level3():
 
 
         SCORE_TEXT = SCORE_FONT.render(f'Score: {seeker.score}', True, (0, 0, 0))  # Create a text surface with the score
-        win.blit(SCORE_TEXT, [0,0])   
+        win.blit(SCORE_TEXT, [680,0])   
         
         # Update the display
         pygame.display.update()
@@ -215,16 +215,16 @@ def run_level3():
                 seeker.hider_location = None
                 seeker.target_location = None
                 tmp_num_hiders -= 1
-                win.fill(COLOR_FLOOR, pygame.Rect(0, 0, SCORE_TEXT.get_width(), SCORE_TEXT.get_height()))  # Fill the area with white color
+                win.fill(COLOR_WINDOW, pygame.Rect(680, 0, SCORE_TEXT.get_width(), SCORE_TEXT.get_height()))  # Fill the area with white color
                 pygame.display.update()
                 SCORE_TEXT = SCORE_FONT.render(f'Score: {seeker.score}', True, (0, 0, 0))  # Create a text surface with the score
-                win.blit(SCORE_TEXT, [0,0])
+                win.blit(SCORE_TEXT, [680,0])
                 if tmp_num_hiders == 0:
                     game_over = True
                     win.fill(COLOR_FLOOR, pygame.Rect(0, 0, TEXT_HIDER_FOUND.get_width(), TEXT_HIDER_FOUND.get_height()))  # Fill the area with white color
                     pygame.display.update()
                     SCORE_TEXT = SCORE_FONT.render(f'Score: {seeker.score}', True, (0, 0, 0))  # Create a text surface with the score
-                    win.blit(SCORE_TEXT, [0,0])
+                    win.blit(SCORE_TEXT, [680,0])
                     win.blit(GAME_OVER_TEXT, GAME_OVER_REC.topleft)    
                     win.blit(RESTART_TEXT, RESTART_REC.topleft)
                     pygame.display.update()        
@@ -270,7 +270,7 @@ def run_level3():
             current_update = False
 
         SCORE_TEXT = SCORE_FONT.render(f'Score: {seeker.score}', True, (0, 0, 0))  # Create a text surface with the score
-        win.blit(SCORE_TEXT, [0,0])   
+        win.blit(SCORE_TEXT, [680,0])   
         
         # Update the display
         pygame.display.update()
