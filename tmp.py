@@ -1,61 +1,40 @@
-# Your existing code up to the game loop remains the same
+def find_path(self, start, goal):
+    open_set = set()
+    closed_set = set()
+    came_from = {}
 
-announcement_time = 0  # Variable to track announcement time
-announcement_duration = 3000  # Duration of the announcement in milliseconds (3 seconds)
+    g_score = {start: 0}
+    f_score = {start: self.heuristic(start, goal)}
 
-while running:
-    clock.tick(FPS)
-    win.fill((50, 133, 168))
-        
-    m.draw()
+    open_set.add(start)
 
-    for obs in obstacles:
-        obs.draw()
-        if seeker.can_pick_obstacle():
-            if seeker.obstacle is None:
-                seeker.set_obstacle(obs)
-                seeker.reset_map_data()
-                seeker.remove_obstacle()
-            key = pygame.key.get_pressed()
-            if key[pygame.K_g]:
-                seeker.set_obstacle(obs)
-            elif key[pygame.K_h]:
-                seeker.remove_obstacle()
-        else:
-            seeker.remove_obstacle()
-        
-    if seeker.obstacle is None:
-        seeker.move()
-        seeker.character_vision(3)
-    else:
-        seeker.move_obstacle()
-        seeker.character_vision(3)
+    while open_set:
+        current = min(open_set, key=lambda node: f_score[node])
 
-    pygame.draw.rect(win, (255, 0, 0), (seeker.col * m.tile_size, seeker.row * m.tile_size, m.tile_size, m.tile_size))
+        if current == goal:
+            return self.reconstruct_path(came_from, goal)
 
-    SCORE_TEXT = SCORE_FONT.render(f'Score: {seeker.score}', True, (0, 0, 0))  # Create a text surface with the score
-    win.blit(SCORE_TEXT, [0,0])   
-    
-    pygame.draw.rect(win, (0, 0, 255), (hider.col * m.tile_size, hider.row * m.tile_size, m.tile_size, m.tile_size))
- 
-    # Check if it's time to announce hider's location
-    if pygame.time.get_ticks() - announcement_time >= announcement_duration:
-        hider_location = []
-        for i in range(0, num_hiders):
-            tmp = hider.annouce_location(2)
-            hider_location.append(tmp)
-            ANNOUNCE_LOCATION_TEXT = SCORE_FONT.render(f'Hider {i + 1} is at {tmp}', True, (0, 0, 0))
-            ANNOUNCE_LOCATION_REC = ANNOUNCE_LOCATION_TEXT.get_rect(center=(WIDTH // 2, HEIGHT // 2 + 50 * i))
-            win.blit(ANNOUNCE_LOCATION_TEXT, ANNOUNCE_LOCATION_REC.topleft)
-            pygame.display.update()
-            pygame.time.wait(1000)
-        seeker.move_count = 0
-        seeker.get_hider_postion(hider_location)
-        announcement_time = pygame.time.get_ticks()  # Update announcement time
+        open_set.remove(current)
+        closed_set.add(current)
 
-    # Update the display
-    pygame.display.update()
-    
-    # Rest of your code remains the same
+        for neighbor in self.neighbors(current):
+            move_direction = (neighbor[0] - current[0], neighbor[1] - current[1])
+            if move_direction == (-self.last_move[0], -self.last_move[1]):
+                continue
 
-pygame.quit()
+            tentative_g_score = g_score[current] + self.cost(current, neighbor)
+
+            if neighbor in closed_set and tentative_g_score >= g_score.get(neighbor, float('inf')):
+                continue
+
+            if neighbor not in open_set or tentative_g_score < g_score.get(neighbor, float('inf')):
+                came_from[neighbor] = current
+                g_score[neighbor] = tentative_g_score
+                f_score[neighbor] = tentative_g_score + self.heuristic(neighbor, goal)
+
+                if neighbor not in open_set:
+                    open_set.add(neighbor)
+
+        self.last_move = (goal[0] - current[0], goal[1] - current[1])
+
+    return None

@@ -21,7 +21,7 @@ def run_level3():
     game_over = False
     
     # Create the map
-    m = MAP('Map/Map4.txt', win)
+    m = MAP('Map/Map3.txt', win)
     
     num_hiders = 5
     
@@ -96,33 +96,25 @@ def run_level3():
                 if exit_button.isOver(pos):
                     running = False
                     back_to_main_menu = True
-                    
         
         if announce is not None:
             if current == 0:
-                if seeker.target_location is not None and new_announcement == True:
-                    min = float('inf')
-                    res = []
-                    for announce_cell in announce:
-                        if distance((seeker.row, seeker.col), announce_cell) < min:
-                            min = distance((seeker.row, seeker.col), announce_cell)
-                            res = announce_cell
-                    seeker.set_target_location(res)
-                    new_announcement = False
-                if seeker.hider_location is None:
+                if (seeker.target_location is not None and new_announcement == True) or seeker.hider_location is None or seeker.target_location is None:
                     closest_distance = float('inf') 
                     closest_location = None  
                     for cell in announce:
                         if distance((seeker.row, seeker.col), cell) < closest_distance:
                             closest_distance = distance((seeker.row, seeker.col), cell)
                             closest_location = cell
-                    if closest_location is not None:  
+                    if closest_location is not None:
                         seeker.set_target_location(closest_location)
+                    new_announcement = False                    
             else:
                 hider = hiders[current - 1]
                 if hider.target_location is None:
-                    target = hider.find_farthest_location((hider.row, hider.col))
+                    target = hider.find_farthest_location()
                     hider.set_target_location(target)
+        print('seeker target', seeker.target_location)
         
         if current == 0:
             seeker.character_vision(3)
@@ -140,6 +132,7 @@ def run_level3():
                 for cell in hider.visible_cells:
                     if seeker.row == cell[0] and seeker.col == cell[1]:
                         hider.target_location = None
+                        hider.seeker_location = (seeker.row, seeker.col)
                         hider.set_target_location(hider.move_when_saw_seeker(seeker.row, seeker.col))
             
         for obs in obstacles:
@@ -261,6 +254,8 @@ def run_level3():
                 hider.announce_location_position.append(temp)
             new_announcement = True
             seeker.move_count = 0
+            print('new announcement', announce)
+            print('-------------------')
                     
         if current_update == True:
             if current == len(hiders):

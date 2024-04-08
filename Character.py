@@ -438,8 +438,7 @@ class Seeker(Character):
                 if self.target_location in announce:
                     announce.remove(self.target_location)
                 self.target_location = None
-
-        
+      
 class Hider(Character):
     def __init__(self, map, windows):
         super().__init__(2, map, windows)
@@ -447,6 +446,8 @@ class Hider(Character):
         self.announce_location_position = []
         self.is_announcing = False
         self.target_location = None
+        self.previous_direction = None
+        self.seeker_location = None
     
     def set_position(self, initial_hider_position):
         for i, row in enumerate(self.map_data):
@@ -456,7 +457,13 @@ class Hider(Character):
                         self.row = i
                         self.col = j
                         return
-
+    def check_target_location_is_walkable(self):
+        if self.target_location is not None:
+            if (0 <= self.target_location[0] < len(self.map_data) and 
+                0 <= self.target_location[1] < len(self.map_data[self.target_location[0]])):
+                if self.map_data[self.target_location[0]][self.target_location[1]] == '1' or (self.target_location == self.seeker_location):
+                    self.target_location = None
+                    
     def announce_location(self, unit_range):
         grid_size = len(self.map_data)
         
@@ -477,9 +484,9 @@ class Hider(Character):
         return announce_pos
     
     def distance(self, p1, p2):
-        return len(self.find_path(p1, p2))
+        return abs(p1[0] - p2[0]) + abs(p1[1] - p2[1])
     
-    def find_farthest_location(self, point):
+    def find_farthest_location(self):
         max_distance = float('-inf')
         farthest_location = None
         start_row = max(0, self.row - 10)
@@ -490,12 +497,12 @@ class Hider(Character):
             for j in range(start_col, end_col):
                 if self.map_data[i][j] != '0':
                     continue
-                distance_to_target = self.distance(point, (i, j))
+                distance_to_target = self.distance((self.row, self.col), (i, j))
                 if distance_to_target > max_distance:
                     max_distance = distance_to_target
                     farthest_location = (i, j)
         return farthest_location
-        
+    
     def move_towards_target(self):
         if self.target_location is not None:
             # Use the A* algorithm to find the shortest path to the target
@@ -529,26 +536,62 @@ class Hider(Character):
                     self.move_down_right()
             
             if self.row == self.target_location[0] and self.col == self.target_location[1]:
+                self.previous_direction = direction
                 self.target_location = None
-                
-    def move_when_saw_seeker(self, seeker_row, seeker_col):
-        diagonal_directions = [(-1, -1), (1, -1), (-1, 1), (1, 1)]
-        straight_directions = [(0, -1), (-1, 0), (1, 0), (0, 1)]
-
-        while True:
-            if diagonal_directions is None:
-                move = random.choice(straight_directions)
-                new_row = self.row + move[0]
-                new_col = self.col + move[1]
-                if self.is_valid_move((new_row, new_col)) and (new_row, new_col) != (seeker_row, seeker_col):
-                    return (new_row, new_col)
+        
+    def move_when_saw_seeker(self, seeker_row, seeker_col): 
+        max_distance = float('-inf')
+        farthest_location = None
+        
+        start_row = 0
+        end_row = 0
+        start_col = 0
+        end_col = 0
+        
+        if self.row == seeker_row:
+            start_row = max(0, self.row - 10)
+            end_row = min(len(self.map_data), self.row + 11)
+        elif self.row < seeker_row:
+            start_row = max(0, self.row - 10)
+            end_row = self.row - 1
+        else:
+            start_row = self.row + 1
+            end_row = min(len(self.map_data), self.row + 11)
+            
+        if self.col == seeker_col:
+            start_col = max(0, self.col - 10)
+            end_col = min(len(self.map_data[0]), self.col + 11)
+        elif self.col < seeker_col:
+            start_col = max(0, self.col - 10)
+            end_col = max(0, self.col - 1)
+        else:
+            start_col = min(self.col + 1, len(self.map_data[0]))
+            end_col = min(len(self.map_data[0]), self.col + 11)
+        
+        for i in range(start_row, end_row):
+            for j in range(start_col, end_col):
+                if self.map_data[i][j] != '0':
+                    continue
+                distance_to_target = self.distance((self.row, self.col), (i, j))
+                if distance_to_target > max_distance:
+                    max_distance = distance_to_target
+                    farthest_location = (i, j)
+        if farthest_location is not None:
+            return farthest_location
+        else:
+            randomList = [(self.row - 1, self.col), (self.row + 1, self.col), (self.row, self.col - 1), (self.row, self.col + 1), (self.row - 1, self.col - 1), (self.row - 1, self.col + 1), (self.row + 1, self.col - 1), (self.row + 1, self.col + 1)]
+            while True:
+                if not randomList:  # Check if randomList is empty
+                    randomList = [(self.row - 1, self.col), (self.row + 1, self.col), (self.row, self.col - 1), (self.row, self.col + 1), (self.row - 1, self.col - 1), (self.row - 1, self.col + 1), (self.row + 1, self.col - 1), (self.row + 1, self.col + 1)]
+                    move = random.choice(randomList)
+                    break
+                move = random.choice(randomList) 
+                if self.is_valid_move(move) and not self.is_adjacent(move, (seeker_row, seeker_col)) and move != (seeker_row, seeker_col):
+                    return move
                 else:
-                    straight_directions.remove(move)
-            else:
-                move = random.choice(diagonal_directions)
-                new_row = self.row + move[0]
-                new_col = self.col + move[1]
-                if self.is_valid_move((new_row, new_col)) and (new_row, new_col) != (seeker_row, seeker_col):
-                    return (new_row, new_col)
-                else:
-                    diagonal_directions.remove(move)
+                    randomList.remove(move)
+            return move
+        
+                    
+    def is_adjacent(self, pos1, pos2):
+        return abs(pos1[0] - pos2[0]) <= 1 and abs(pos1[1] - pos2[1]) <= 1

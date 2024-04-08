@@ -104,7 +104,6 @@ def movement(num_hiders, filename):
                     running = False
                     back_to_main_menu = True
         
-        print('announce:', announce)
         if game_started == True:
             if announce is not None:
                 if seeker.hider_location is None or seeker.target_location is None:
@@ -147,7 +146,6 @@ def movement(num_hiders, filename):
             else:
                 seeker.remove_obstacle()
 
-        # seeker.check_target_location_is_walkable()
 
 
         if game_started == True:
