@@ -5,6 +5,7 @@ from setting import *
 import random
 from Obstacle import Obstacle
 from Button import ImageButton
+import os
 
 #Create button instance
 start_button = ImageButton(start_img, 680, 250)
@@ -23,7 +24,15 @@ def run_level3():
     # Create the map
     m = MAP('Map/Map3.txt', win)
     
-    num_hiders = 5
+    num_hiders = 0
+    
+    with open(os.path.normpath('Map/Map3.txt'), 'r') as file:
+        rows, cols = map(int, file.readline().split()) 
+        for i in range(rows):
+            line = file.readline().strip()
+            for j in range(cols):
+                if line[j] == '2':
+                    num_hiders += 1
     
     # Create the characters
     seeker = Seeker(m, win)
