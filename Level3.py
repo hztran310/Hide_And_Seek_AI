@@ -106,10 +106,9 @@ def run_level3():
                     running = False
                     back_to_main_menu = True
                     
-        
         if announce is not None:
             if current == 0:
-                if seeker.target_location is not None and new_announcement == True:
+                if (seeker.target_location is not None and new_announcement == True) or seeker.hider_location is None or seeker.target_location is None:
                     min = float('inf')
                     res = []
                     for announce_cell in announce:
@@ -118,15 +117,6 @@ def run_level3():
                             res = announce_cell
                     seeker.set_target_location(res)
                     new_announcement = False
-                if seeker.hider_location is None:
-                    closest_distance = float('inf') 
-                    closest_location = None  
-                    for cell in announce:
-                        if distance((seeker.row, seeker.col), cell) < closest_distance:
-                            closest_distance = distance((seeker.row, seeker.col), cell)
-                            closest_location = cell
-                    if closest_location is not None:  
-                        seeker.set_target_location(closest_location)
             else:
                 hider = hiders[current - 1]
                 if hider.target_location is None:
@@ -172,23 +162,17 @@ def run_level3():
                     seeker.remove_obstacle()
             else:
                 seeker.remove_obstacle()
-
-        if current == 0:
-            seeker.check_target_location_is_walkable()
-        else:
-            hider = hiders[current - 1]
-            hider.check_target_location_is_walkable()
         
         if game_started == True:
             if current == 0:
-                if seeker.target_location is not None:
-                    seeker.move_towards_target(announce)
-                    current_update = True
-                    pygame.time.wait(100)
-                else:
+                if seeker.target_location == []:
                     seeker.random_move()
                     if has_announce == True:
                         current_update = True
+                    pygame.time.wait(100)
+                elif seeker.target_location is not None:
+                    seeker.move_towards_target(announce)
+                    current_update = True
                     pygame.time.wait(100)
             else:
                 hider = hiders[current - 1]
