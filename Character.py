@@ -532,23 +532,45 @@ class Hider(Character):
                 self.target_location = None
                 
     def move_when_saw_seeker(self, seeker_row, seeker_col):
-        diagonal_directions = [(-1, -1), (1, -1), (-1, 1), (1, 1)]
-        straight_directions = [(0, -1), (-1, 0), (1, 0), (0, 1)]
-
-        while True:
-            if diagonal_directions is None:
-                move = random.choice(straight_directions)
-                new_row = self.row + move[0]
-                new_col = self.col + move[1]
-                if self.is_valid_move((new_row, new_col)) and (new_row, new_col) != (seeker_row, seeker_col):
-                    return (new_row, new_col)
+        start_row = 0
+        end_row = len(self.map_data)
+        start_col = 0
+        end_col = len(self.map_data[0])
+        
+        if self.row < seeker_row:
+            start_row = max(0, self.row - 10)
+            end_row = min(len(self.map_data), self.row - 1)
+        elif self.row > seeker_row:
+            start_row = min(len(self.map_data), self.row + 1)
+            end_row = min(len(self.map_data), self.row + 11)
+        
+        if self.col < seeker_col:
+            start_col = max(0, self.col - 10)
+            end_col = min(len(self.map_data[0]), self.col - 1)
+        elif self.col > seeker_col:
+            start_col = min(len(self.map_data[0]), self.col + 1)
+            end_col = min(len(self.map_data[0]), self.col + 11)
+        
+        max_distance = float('-inf')
+        farthest_location = None
+        
+        for i in range(start_row, end_row):
+            for j in range(start_col, end_col):
+                if self.map_data[i][j] != '0' or (i == seeker_row and j == seeker_col):
+                    continue
+                distance_to_target = self.distance((seeker_row, seeker_col), (i, j))
+                if distance_to_target > max_distance:
+                    max_distance = distance_to_target
+                    farthest_location = (i, j)
+        
+        if farthest_location is not None:
+            return farthest_location
+        else:
+            while True:
+                randomList = [(self.row - 1, self.col), (self.row + 1, self.col), (self.row, self.col - 1), (self.row, self.col + 1), (self.row - 1, self.col - 1), (self.row - 1, self.col + 1), (self.row + 1, self.col - 1), (self.row + 1, self.col + 1)]
+                random_location = random.choice(randomList)
+                if self.is_valid_move(random_location) and random_location != (seeker_row, seeker_col):
+                    return random_location
                 else:
-                    straight_directions.remove(move)
-            else:
-                move = random.choice(diagonal_directions)
-                new_row = self.row + move[0]
-                new_col = self.col + move[1]
-                if self.is_valid_move((new_row, new_col)) and (new_row, new_col) != (seeker_row, seeker_col):
-                    return (new_row, new_col)
-                else:
-                    diagonal_directions.remove(move)
+                    randomList.remove(random_location)
+                
