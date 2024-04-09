@@ -11,7 +11,7 @@ start_button = ImageButton(start_img, 680, 250)
 exit_button = ImageButton(exit_img, 680, 350)
 
 def run_level2():
-    filename = 'Map/Map2.txt'
+    filename = 'Map/Map1.txt'
     num_hiders = 0
     with open(os.path.normpath(filename), 'r') as file:
         rows, cols = map(int, file.readline().split()) 
