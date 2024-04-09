@@ -5,6 +5,7 @@ import numpy as np
 import random
 from queue import PriorityQueue
 from setting import *
+import math
 
 class Character:
     def __init__(self, character_type, map, windows):
@@ -217,7 +218,7 @@ class Character:
         for point in points:
             x, y = point
             color = self.win.get_at((y * self.tile_size, x * self.tile_size))
-            if color == (COLOR_WALL[0], COLOR_WALL[1], COLOR_WALL[2], 255) or color == (COLOR_HIDER[0], COLOR_HIDER[1], COLOR_HIDER[2], 255) or color == (COLOR_SEEKER[0], COLOR_SEEKER[1], COLOR_SEEKER[2], 255):  # If the point is a wall, return False
+            if color == (COLOR_WALL[0], COLOR_WALL[1], COLOR_WALL[2], 255) or color == (COLOR_HIDER[0], COLOR_HIDER[1], COLOR_HIDER[2], 255) or color == (COLOR_SEEKER[0], COLOR_SEEKER[1], COLOR_SEEKER[2], 255) or color == (COLOR_OBS[0], COLOR_OBS[1], COLOR_OBS[2], 255):  # If the point is a wall, return False
                 return False
         return True
     
@@ -290,7 +291,7 @@ class Character:
     def heuristic(self, cell1, cell2):
         x1, y1 = cell1
         x2, y2 = cell2
-        return abs(x1 - x2) + abs(y1 - y2)
+        return math.sqrt((x1 - x2)**2 + (y1 - y2)**2)
     
     def find_path(self, start, goal):
         open_set = set()
