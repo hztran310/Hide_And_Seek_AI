@@ -176,10 +176,13 @@ def run_level3():
                         hider.move_towards_target()
                         current_update = True
                         pygame.time.wait(100)
-                            
+        # if current == 0:     
         seeker.character_vision(3) 
         seeker.draw_character_vision()
-        
+        # else:
+        #     hider = hiders[current - 1]
+        #     hider.character_vision(2)
+        #     hider.draw_character_vision()
         for hider in hiders:
             hider.character_vision(2)
             hider.draw_character_vision()

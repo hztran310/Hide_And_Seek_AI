@@ -488,84 +488,37 @@ class Hider(Character):
     def find_farthest_location(self):
         max_distance = float('-inf')
         farthest_location = None
-        
-        start_row = 0
-        start_col = 0
-        end_row = 0
-        end_col = 0
-        
-        if self.row == self.announce_location_position[0]:
-            if abs(self.row - 0) <= abs(self.row - len(self.map_data)):
-                start_row = self.row
-                end_row = min(len(self.map_data), self.row + 10)
-            else:
-                start_row = max(0, self.row - 10)
-                end_row = self.row
-        elif self.row < self.announce_location_position[0]:
-            start_row = max(0, self.row - 10)
-            end_row = self.row
-        elif self.row > self.announce_location_position[0]:
-            start_row = self.row
-            end_row = min(len(self.map_data), self.row + 10)
-            
-        if self.col == self.announce_location_position[1]:
-            if abs(self.col - 0) <= abs(self.col - len(self.map_data[0])):
-                start_col = self.col
-                end_col = min(len(self.map_data[0]), self.col + 10)
-            else:
-                start_col = max(0, self.col - 10)
-                end_col = self.col
-        elif self.col < self.announce_location_position[1]:
-            start_col = max(0, self.col - 10)
-            end_col = self.col
-        elif self.col > self.announce_location_position[1]:
-            start_col = self.col
-            end_col = min(len(self.map_data[0]), self.col + 10)
-        
-        if start_row == end_row and end_row == 0:
-            end_row = 1
-        elif start_row == end_row and end_row == len(self.map_data) - 1:
-            start_row -= 1
-            
-        if start_col == end_col and end_col== 0:
-            end_col = 1
-        elif start_col == end_col and end_col == len(self.map_data[0]) - 1:
-            start_col -= 1
 
-        if (start_row == end_row - 1) and (start_col == end_col - 1) and (start_row, start_col) == (self.row, self.col):
-            directions = [(-1, 0), (1, 0), (0, -1), (0, 1), (-1, -1), (-1, 1), (1, -1), (1, 1)]
-            max_distance = 0
-            farthest_location = None
+        # Define the search area
+        start_row = max(0, self.row - 10)
+        end_row = min(len(self.map_data), self.row + 10)
+        start_col = max(0, self.col - 10)
+        end_col = min(len(self.map_data[0]), self.col + 10)
 
-            for direction in directions:
-                distance = 0
-                row, col = start_row, start_col
-
-                while True:
-                    row += direction[0]
-                    col += direction[1]
-
-                    # Check if the new position is within the map and not an obstacle
-                    if (0 <= row < len(self.map_data)) and (0 <= col < len(self.map_data[0])) and self.map_data[row][col] != '0':
-                        distance += 1
-                    else:
-                        break
-
+        for i in range(start_row, end_row):
+            for j in range(start_col, end_col):
+                if self.map_data[i][j] == '1' or self.map_data[i][j] == '4':
+                    continue
+                distance = self.distance((i, j), self.announce_location_position)
                 if distance > max_distance:
                     max_distance = distance
-                    best_direction = direction
-                    farthest_location = (row - direction[0], col - direction[1])
-            return farthest_location            
-        else:
+                    farthest_location = (i, j)
+
+        # If no farthest location was found within the search area, wrap around the map
+        if farthest_location is None:
             for i in range(start_row, end_row):
                 for j in range(start_col, end_col):
-                    if self.map_data[i][j] == '1' or self.map_data[i][j] == '4':
+                    # Calculate the new positions by wrapping around the map
+                    new_i = (i + len(self.map_data)) % len(self.map_data)
+                    new_j = (j + len(self.map_data[0])) % len(self.map_data[0])
+                    if self.map_data[new_i][new_j] == '1' or self.map_data[new_i][new_j] == '4':
                         continue
-                    distance = self.distance((i, j), self.announce_location_position)
+                    distance = self.distance((new_i, new_j), self.announce_location_position)
                     if distance > max_distance:
                         max_distance = distance
-                        farthest_location = (i, j)
-            return farthest_location
+                        farthest_location = (new_i, new_j)
+
+        return farthest_location
 
                 
     def find_path(self, start, goal):
@@ -658,14 +611,15 @@ class Hider(Character):
                 
     def move_when_saw_seeker(self, seeker_row, seeker_col):
         start_row = max(0, self.row - 1)
-        end_row = min(len(self.map_data), self.row + 1)
+        end_row = min(len(self.map_data), self.row + 2)
         start_col = max(0, self.col - 1)
-        end_col = min(len(self.map_data[0]), self.col + 1)
+        end_col = min(len(self.map_data[0]), self.col + 2)
         
         print('hider_position: ', self.row, self.col)
         print('seeker_position: ', seeker_row, seeker_col)
         
-        randomList = []
+        randomSet = set()
+        fallbackSet = set()
                                    
         for i in range(start_row, end_row):
             for j in range(start_col, end_col):
@@ -679,27 +633,28 @@ class Hider(Character):
                         if (new_row >= 0 and new_row < len(self.map_data) and
                             new_col >= 0 and new_col < len(self.map_data[0]) and
                             self.map_data[new_row][new_col] == '0') and (new_row, new_col) != (seeker_row, seeker_col) and (i, j) != (seeker_row, seeker_col):
-                            randomList.append((i, j))
+                            # Check if the new position is adjacent to the seeker
+                            if abs(new_row - seeker_row) <= 1 and abs(new_col - seeker_col) <= 1:
+                                fallbackSet.add((i, j))
+                                continue
+                            randomSet.add((i, j))
                             break
-                else:
-                    continue  
-        randomMove = False
+                    else:
+                        continue  
+
         while True:
-            if randomList == []:
-                randomMove = True
-                print('randomList is none')
-                randomList = [(self.row - 1, self.col), (self.row + 1, self.col), (self.row, self.col - 1), (self.row, self.col + 1), (self.row - 1, self.col - 1), (self.row - 1, self.col + 1), (self.row + 1, self.col - 1), (self.row + 1, self.col + 1)]
-                move = random.choice(randomList)
-                if self.is_valid_move(move) and move != (seeker_row, seeker_col):
-                    return move
+            if not randomSet:
+                if fallbackSet:
+                    randomSet = fallbackSet
                 else:
-                    randomList.remove(move) 
-            if randomMove ==  True:
-                continue
+                    print('No valid moves available')
+                    return None
+            # Select the move with the greatest distance to the seeker
+            move = max(list(randomSet), key=lambda pos: math.sqrt((pos[0] - seeker_row)**2 + (pos[1] - seeker_col)**2))
+            if self.is_valid_move(move) and move != (seeker_row, seeker_col):
+                return move
             else:
-                random_location = random.choice(randomList)
-                print('random_location: ', random_location)
-                return random_location
+                randomSet.remove(move)
 
         
                 
