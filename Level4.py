@@ -81,7 +81,7 @@ def run_level4():
     pre_start = True
 
     for hider in hiders:
-        hider.time_limit = 15
+        hider.time_limit = 100
 
     while running:
         clock.tick(FPS)
@@ -112,7 +112,7 @@ def run_level4():
                     back_to_main_menu = True
         
 
-        if announce is not None:
+        if announce is not None and not pre_start:
             if current == 0:
                 if (seeker.target_location is not None and new_announcement == True) or seeker.hider_location is None or seeker.target_location is None:
                     closest_distance = float('inf') 
@@ -132,16 +132,25 @@ def run_level4():
 
         for obs in obstacles:
             obs.draw()
-            seeker.obstacles.append(obs)
             
             for hider in hiders:
                 hider.obstacles.append(obs)
+
+        for hider in hiders:
+            hider.reset_map_data()
+        
     
         if game_started == True:
             if pre_start:
                 hider = hiders[current]
-                
-                
+                hider.go_to_obstacle()
+                hider.move_towards_target()
+                pygame.time.wait(100)
+                current += 1
+                if current == len(hiders):
+                    current = 0
+                if all(hider.time_limit == 0 for hider in hiders):
+                    pre_start = False
             else:
                 # Normal game phase: both the hider and seeker can move
                 if current == 0:
@@ -175,10 +184,6 @@ def run_level4():
             pygame.draw.rect(win, COLOR_HIDER, (hider.col * m.tile_size, hider.row * m.tile_size, m.tile_size, m.tile_size))
             
         pygame.draw.rect(win, COLOR_SEEKER, (seeker.col * m.tile_size, seeker.row * m.tile_size, m.tile_size, m.tile_size))
-
-
-        SCORE_TEXT = SCORE_FONT.render(f'Score: {seeker.score}', True, (0, 0, 0))  # Create a text surface with the score
-        win.blit(SCORE_TEXT, [0,0])   
         
         # Update the display
         pygame.display.update()
