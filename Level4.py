@@ -127,7 +127,7 @@ def run_level4():
             else:
                 hider = hiders[current - 1]
                 if hider.target_location is None:
-                    target = hider.find_farthest_location()
+                    target = hider.find_farthest_location((hider.row, hider.col))
                     hider.set_target_location(target)
 
         for obs in obstacles:
@@ -143,9 +143,27 @@ def run_level4():
         if game_started == True:
             if pre_start:
                 hider = hiders[current]
-                hider.go_to_obstacle()
-                hider.move_towards_target()
-                pygame.time.wait(100)
+                if not hider.can_pick_obstacle() and hider.obstacle is None:
+                    hider.go_to_obstacle()
+                    hider.move_towards_target()
+                    pygame.time.wait(100)
+                elif hider.can_pick_obstacle():
+                    for direction in [(0, -1), (-1, 0), (0, 1), (1, 0), (-1, -1), (-1, 1), (1, -1), (1, 1)]:
+                        row = hider.row + direction[0]
+                        col = hider.col + direction[1]
+                        for obs in obstacles:
+                            if obs.get_obstacle((row, col)) is not None:
+                                hider.set_obstacle(obs)
+                                break
+                    
+                    hider.move_obstacle_to_entrance()
+                    pygame.time.wait(100)
+                else:
+                    hider.remove_obstacle()
+                    hider.time_limit = 0
+
+                hider.reset_map_data()
+
                 current += 1
                 if current == len(hiders):
                     current = 0

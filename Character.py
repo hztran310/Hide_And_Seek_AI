@@ -201,7 +201,7 @@ class Character:
         for new_x in range(left_limit, right_limit):
             for new_y in range(top_limit, bottom_limit):
                 color = self.win.get_at((new_y * self.tile_size, new_x * self.tile_size))
-                if not (new_x == x and new_y == y) and color != (COLOR_WALL[0], COLOR_WALL[1], COLOR_WALL[2], 255) and color != (COLOR_OBS[0], COLOR_OBS[1], COLOR_OBS[2], 255):
+                if not (new_x == x and new_y == y) and color != (COLOR_WALL[0], COLOR_WALL[1], COLOR_WALL[2], 255) and color != (COLOR_OBS[0], COLOR_OBS[1], COLOR_OBS[2], 255) and color != (COLOR_HIDER[0], COLOR_HIDER[1], COLOR_HIDER[2], 255) and color != (COLOR_SEEKER[0], COLOR_SEEKER[1], COLOR_SEEKER[2], 255):
                     if self.has_line_of_sight((x, y), (new_x, new_y)):
                         self.visible_cells.append((new_x, new_y))
 
@@ -450,6 +450,7 @@ class Hider(Character):
         self.announce_location_position = []
         self.is_announcing = False
         self.target_location = None
+        self.move_direction = []
     
     def set_position(self, initial_hider_position):
         for i, row in enumerate(self.map_data):
@@ -503,7 +504,6 @@ class Hider(Character):
         if self.target_location is not None:
             # Use the A* algorithm to find the shortest path to the target
             path = self.find_path((self.row, self.col), self.target_location)
-            print(path)
 
             # If a path was found, move to the next cell in the path
             if path:
@@ -513,6 +513,7 @@ class Hider(Character):
                     if path:
                         next_cell = path[0]
                 direction = self.move_to_neighbor(next_cell)
+                self.move_direction.append(direction)
 
                 # Call the appropriate movement method based on the direction
                 if direction == 'Up':
@@ -603,10 +604,19 @@ class Hider(Character):
             if closest_obstacle_adjacent is not None:
                 self.set_target_location(closest_obstacle_adjacent)
 
-    def calculate_entrance(self):
-        pass
+    def move_obstacle_to_entrance(self):
+        if self.move_direction:
+            direction = self.move_direction.pop(0)
+            if direction == 'Up':
+                self.move_obstacle('Down')
+            elif direction == 'Down':
+                self.move_obstacle('Up')
+            elif direction == 'Left':
+                self.move_obstacle('Right')
+            elif direction == 'Right':
+                self.move_obstacle('Left')
 
-    def move_obstacle_to_entrace(self):
-        pass
+        self.time_limit -= 1
+            
 
         
