@@ -202,7 +202,7 @@ class Character:
         for new_x in range(left_limit, right_limit):
             for new_y in range(top_limit, bottom_limit):
                 color = self.win.get_at((new_y * self.tile_size, new_x * self.tile_size))
-                if not (new_x == x and new_y == y) and color != (COLOR_WALL[0], COLOR_WALL[1], COLOR_WALL[2], 255) and color != (COLOR_OBS[0], COLOR_OBS[1], COLOR_OBS[2], 255):
+                if not (new_x == x and new_y == y) and color != (COLOR_WALL[0], COLOR_WALL[1], COLOR_WALL[2], 255) and color != (COLOR_OBS[0], COLOR_OBS[1], COLOR_OBS[2], 255) and color != (COLOR_HIDER[0], COLOR_HIDER[1], COLOR_HIDER[2], 255) and color != (COLOR_SEEKER[0], COLOR_SEEKER[1], COLOR_SEEKER[2], 255):
                     if self.has_line_of_sight((x, y), (new_x, new_y)):
                         self.visible_cells.append((new_x, new_y))
 
