@@ -576,4 +576,11 @@ class Hider(Character):
                     return random_location
                 else:
                     randomList.remove(random_location)
+
+    def move_to_obstacle(self):
+        pass
+
+    def distance_to(self, obstacle):
+        return ((self.row - obstacle.row) ** 2 + (self.col - obstacle.col) ** 2) ** 0.5
+
                 

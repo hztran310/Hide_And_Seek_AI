@@ -1,6 +1,7 @@
 from Level1 import run_level1
 from Level2 import run_level2
 from Level3 import run_level3
+from Level4 import run_level4
 from setting import *
 from Button import Button
 
@@ -21,6 +22,7 @@ def main_menu():
     level1_button = Button((249, 235, 170), 50, 150, 200, 80, 'Level 1')
     level2_button = Button((241, 238, 220), 50, 300, 200, 80, 'Level 2')
     level3_button = Button((73, 159, 164), 50, 450, 200, 80, 'Level 3')
+    level4_button = Button((73, 159, 164), 50, 600, 200, 80, 'Level 4')
     title = pygame.image.load('image/title.png')
     
     # Set up the loop
@@ -32,6 +34,7 @@ def main_menu():
         level1_button.draw(win, index=0, total_buttons=3, gap=10)
         level2_button.draw(win, index=1, total_buttons=3, gap=10)
         level3_button.draw(win, index=2, total_buttons=3, gap=10)
+        level4_button.draw(win, index=3, total_buttons=3, gap=10)
         win.blit(title, (150, 5))
         pygame.display.update()
         for event in pygame.event.get():
@@ -49,6 +52,10 @@ def main_menu():
                         continue
                 if level3_button.isOver(pos):
                     back_to_main_menu = run_level3()
+                    if back_to_main_menu == True:
+                        continue
+                if level4_button.isOver(pos):
+                    back_to_main_menu = run_level4()
                     if back_to_main_menu == True:
                         continue
 
