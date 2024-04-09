@@ -5,6 +5,7 @@ import numpy as np
 import random
 from queue import PriorityQueue
 from setting import *
+import math
 
 class Character:
     def __init__(self, character_type, map, windows):
@@ -447,6 +448,8 @@ class Hider(Character):
         self.announce_location_position = []
         self.is_announcing = False
         self.target_location = None
+        self.new_announce = False
+        self.previous_path = []
     
     def set_position(self, initial_hider_position):
         for i, row in enumerate(self.map_data):
@@ -477,29 +480,147 @@ class Hider(Character):
         return announce_pos
     
     def distance(self, p1, p2):
-        return len(self.find_path(p1, p2))
+        return math.sqrt((p1[0] - p2[0])**2 + (p1[1] - p2[1])**2)
     
-    def find_farthest_location(self, point):
+    def find_farthest_location(self):
         max_distance = float('-inf')
         farthest_location = None
-        start_row = max(0, self.row - 10)
-        end_row = min(len(self.map_data), self.row + 11)
-        start_col = max(0, self.col - 10)
-        end_col = min(len(self.map_data[0]), self.col + 11)
-        for i in range(start_row, end_row):
-            for j in range(start_col, end_col):
-                if self.map_data[i][j] != '0':
-                    continue
-                distance_to_target = self.distance(point, (i, j))
-                if distance_to_target > max_distance:
-                    max_distance = distance_to_target
-                    farthest_location = (i, j)
-        return farthest_location
         
+        start_row = 0
+        start_col = 0
+        end_row = 0
+        end_col = 0
+        
+        if self.row == self.announce_location_position[0]:
+            if abs(self.row - 0) <= abs(self.row - len(self.map_data)):
+                start_row = self.row
+                end_row = min(len(self.map_data), self.row + 10)
+            else:
+                start_row = max(0, self.row - 10)
+                end_row = self.row
+        elif self.row < self.announce_location_position[0]:
+            start_row = max(0, self.row - 10)
+            end_row = self.row
+        elif self.row > self.announce_location_position[0]:
+            start_row = self.row
+            end_row = min(len(self.map_data), self.row + 10)
+            
+        if self.col == self.announce_location_position[1]:
+            if abs(self.col - 0) <= abs(self.col - len(self.map_data[0])):
+                start_col = self.col
+                end_col = min(len(self.map_data[0]), self.col + 10)
+            else:
+                start_col = max(0, self.col - 10)
+                end_col = self.col
+        elif self.col < self.announce_location_position[1]:
+            start_col = max(0, self.col - 10)
+            end_col = self.col
+        elif self.col > self.announce_location_position[1]:
+            start_col = self.col
+            end_col = min(len(self.map_data[0]), self.col + 10)
+        
+        if start_row == end_row and end_row == 0:
+            end_row = 1
+        elif start_row == end_row and end_row == len(self.map_data) - 1:
+            start_row -= 1
+            
+        if start_col == end_col and end_col== 0:
+            end_col = 1
+        elif start_col == end_col and end_col == len(self.map_data[0]) - 1:
+            start_col -= 1
+
+        if (start_row == end_row - 1) and (start_col == end_col - 1) and (start_row, start_col) == (self.row, self.col):
+            directions = [(-1, 0), (1, 0), (0, -1), (0, 1), (-1, -1), (-1, 1), (1, -1), (1, 1)]
+            max_distance = 0
+            farthest_location = None
+
+            for direction in directions:
+                distance = 0
+                row, col = start_row, start_col
+
+                while True:
+                    row += direction[0]
+                    col += direction[1]
+
+                    # Check if the new position is within the map and not an obstacle
+                    if (0 <= row < len(self.map_data)) and (0 <= col < len(self.map_data[0])) and self.map_data[row][col] != '0':
+                        distance += 1
+                    else:
+                        break
+
+                if distance > max_distance:
+                    max_distance = distance
+                    best_direction = direction
+                    farthest_location = (row - direction[0], col - direction[1])
+            return farthest_location            
+        else:
+            for i in range(start_row, end_row):
+                for j in range(start_col, end_col):
+                    if self.map_data[i][j] == '1' or self.map_data[i][j] == '4':
+                        continue
+                    distance = self.distance((i, j), self.announce_location_position)
+                    if distance > max_distance:
+                        max_distance = distance
+                        farthest_location = (i, j)
+            return farthest_location
+
+                
+    def find_path(self, start, goal):
+        row, col = goal
+        if self.map_data[row][col] == '1' or self.map_data[row][col] == '4':
+            start_row = max(0, row - 3)
+            end_row = min(len(self.map_data), row + 3)
+            start_col = max(0, col - 3)
+            end_col = min(len(self.map_data[0]), col + 3)
+            for i in range(start_row, end_row):
+                for j in range(start_col, end_col):
+                    if self.map_data[i][j] == '0':
+                        goal = (i, j)
+                        break
+                
+        open_set = set()
+        closed_set = set()
+        came_from = {}
+
+        g_score = {start: 0}
+        f_score = {start: self.heuristic(start, goal)}
+
+        open_set.add(start)
+
+        while open_set:
+            current = min(open_set, key=lambda node: f_score[node])
+
+            if current == goal:
+                return self.reconstruct_path(came_from, goal)
+
+            open_set.remove(current)
+            closed_set.add(current)
+
+            for neighbor in self.neighbors(current):
+                tentative_g_score = g_score[current] + self.cost(current, neighbor)
+
+                if neighbor in self.previous_path:
+                    tentative_g_score += 1000  # Adjust the penalty value as needed
+
+                if neighbor in closed_set and tentative_g_score >= g_score.get(neighbor, float('inf')):
+                    continue
+
+                if neighbor not in open_set or tentative_g_score < g_score.get(neighbor, float('inf')):
+                    came_from[neighbor] = current
+                    g_score[neighbor] = tentative_g_score
+                    f_score[neighbor] = tentative_g_score + self.heuristic(neighbor, goal)
+
+                    if neighbor not in open_set:
+                        open_set.add(neighbor)
+
+        return None
+    
     def move_towards_target(self):
         if self.target_location is not None:
             # Use the A* algorithm to find the shortest path to the target
             path = self.find_path((self.row, self.col), self.target_location)
+            
+            full_path = path.copy()
 
             # If a path was found, move to the next cell in the path
             if path:
@@ -529,48 +650,53 @@ class Hider(Character):
                     self.move_down_right()
             
             if self.row == self.target_location[0] and self.col == self.target_location[1]:
+                self.previous_path = full_path
                 self.target_location = None
                 
     def move_when_saw_seeker(self, seeker_row, seeker_col):
-        start_row = 0
-        end_row = len(self.map_data)
-        start_col = 0
-        end_col = len(self.map_data[0])
+        start_row = max(0, self.row - 1)
+        end_row = min(len(self.map_data), self.row + 1)
+        start_col = max(0, self.col - 1)
+        end_col = min(len(self.map_data[0]), self.col + 1)
         
-        if self.row < seeker_row:
-            start_row = max(0, self.row - 10)
-            end_row = min(len(self.map_data), self.row - 1)
-        elif self.row > seeker_row:
-            start_row = min(len(self.map_data), self.row + 1)
-            end_row = min(len(self.map_data), self.row + 11)
+        print('hider_position: ', self.row, self.col)
+        print('seeker_position: ', seeker_row, seeker_col)
         
-        if self.col < seeker_col:
-            start_col = max(0, self.col - 10)
-            end_col = min(len(self.map_data[0]), self.col - 1)
-        elif self.col > seeker_col:
-            start_col = min(len(self.map_data[0]), self.col + 1)
-            end_col = min(len(self.map_data[0]), self.col + 11)
-        
-        max_distance = float('-inf')
-        farthest_location = None
-        
+        randomList = []
+                                   
         for i in range(start_row, end_row):
             for j in range(start_col, end_col):
-                if self.map_data[i][j] != '0' or (i == seeker_row and j == seeker_col):
-                    continue
-                distance_to_target = self.distance((seeker_row, seeker_col), (i, j))
-                if distance_to_target > max_distance:
-                    max_distance = distance_to_target
-                    farthest_location = (i, j)
-        
-        if farthest_location is not None:
-            return farthest_location
-        else:
-            while True:
-                randomList = [(self.row - 1, self.col), (self.row + 1, self.col), (self.row, self.col - 1), (self.row, self.col + 1), (self.row - 1, self.col - 1), (self.row - 1, self.col + 1), (self.row + 1, self.col - 1), (self.row + 1, self.col + 1)]
-                random_location = random.choice(randomList)
-                if self.is_valid_move(random_location) and random_location != (seeker_row, seeker_col):
-                    return random_location
+                if i >= 0 and i < len(self.map_data) and j >= 0 and j < len(self.map_data[0]) and self.map_data[i][j] == '0':
+                    if self.map_data[i][j] == '1' or self.map_data[i][j] == '4' or (i == seeker_row and j == seeker_col) or (i == self.row and j == self.col):
+                        continue
+                    direction = [(-1, 0), (1, 0), (0, -1), (0, 1), (-1, -1), (-1, 1), (1, -1), (1, 1)]
+                    for dir in direction:
+                        new_row = i + dir[0]
+                        new_col = j + dir[1]
+                        if (new_row >= 0 and new_row < len(self.map_data) and
+                            new_col >= 0 and new_col < len(self.map_data[0]) and
+                            self.map_data[new_row][new_col] == '0') and (new_row, new_col) != (seeker_row, seeker_col) and (i, j) != (seeker_row, seeker_col):
+                            randomList.append((i, j))
+                            break
                 else:
-                    randomList.remove(random_location)
+                    continue  
+        randomMove = False
+        while True:
+            if randomList == []:
+                randomMove = True
+                print('randomList is none')
+                randomList = [(self.row - 1, self.col), (self.row + 1, self.col), (self.row, self.col - 1), (self.row, self.col + 1), (self.row - 1, self.col - 1), (self.row - 1, self.col + 1), (self.row + 1, self.col - 1), (self.row + 1, self.col + 1)]
+                move = random.choice(randomList)
+                if self.is_valid_move(move) and move != (seeker_row, seeker_col):
+                    return move
+                else:
+                    randomList.remove(move) 
+            if randomMove ==  True:
+                continue
+            else:
+                random_location = random.choice(randomList)
+                print('random_location: ', random_location)
+                return random_location
+
+        
                 

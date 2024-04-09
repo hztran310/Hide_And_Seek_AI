@@ -51,8 +51,6 @@ def main_menu():
                     back_to_main_menu = run_level3()
                     if back_to_main_menu == True:
                         continue
-
-
     pygame.quit()
 
 main_menu()

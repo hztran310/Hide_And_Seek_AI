@@ -21,12 +21,14 @@ def run_level3():
     game_started = False
     game_over = False
     
+    filename = 'Map/Map2.txt'
+    
     # Create the map
-    m = MAP('Map/Map3.txt', win)
+    m = MAP(filename, win)
     
     num_hiders = 0
     
-    with open(os.path.normpath('Map/Map3.txt'), 'r') as file:
+    with open(os.path.normpath(filename), 'r') as file:
         rows, cols = map(int, file.readline().split()) 
         for i in range(rows):
             line = file.readline().strip()
@@ -119,8 +121,9 @@ def run_level3():
                     new_announcement = False
             else:
                 hider = hiders[current - 1]
-                if hider.target_location is None:
-                    target = hider.find_farthest_location((hider.row, hider.col))
+                if (hider.target_location is None) or new_announcement == True:
+                    hider.target_location = None
+                    target = hider.find_farthest_location()
                     hider.set_target_location(target)
         
         if current == 0:
@@ -182,9 +185,7 @@ def run_level3():
                         current_update = True
                         pygame.time.wait(100)
                             
-                    
-        seeker.character_vision(3)
-            
+        seeker.character_vision(3) 
         seeker.draw_character_vision()
         
         for hider in hiders:
@@ -251,7 +252,8 @@ def run_level3():
             for hider in hiders:
                 temp = hider.announce_location(3)
                 announce.append(temp)
-                hider.announce_location_position.append(temp)
+                hider.announce_location_position = temp
+                hider.new_announce = True
             new_announcement = True
             seeker.move_count = 0
                     
