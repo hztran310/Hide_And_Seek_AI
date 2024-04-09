@@ -150,8 +150,16 @@ def run_level4():
                             seeker.move_obstacle('Right')
                         elif seeker.previous_move == 'Right':
                             seeker.move_obstacle('Left')
-                        seeker.previous_move = None
-                        seeker.remove_obstacle()
+                        elif seeker.previous_move == 'Up_Left':
+                            seeker.move_obstacle('Down')
+                        elif seeker.previous_move == 'Up_Right':
+                            seeker.move_obstacle('Down')
+                        elif seeker.previous_move == 'Down_Left':
+                            seeker.move_obstacle('Up')
+                        elif seeker.previous_move == 'Down_Right':
+                            seeker.move_obstacle('Up')
+                        
+                    seeker.remove_obstacle()
                 else:
                     if (seeker.target_location is not None and new_announcement == True) or seeker.hider_location is None or seeker.target_location is None:
                         closest_distance = float('inf') 
