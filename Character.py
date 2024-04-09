@@ -17,6 +17,7 @@ class Character:
         self.move_delay = 1000
         self.last_move_time = 0
         self.visible_cells = None
+        self.obstacles = []
         self.obstacle = None
         self.has_append_move = False
         self.color = None
@@ -40,13 +41,15 @@ class Character:
     def reset_map_data(self):
         for i, row in enumerate(self.map_data):
             for j, col in enumerate(row):
-                if col == '3' or col == '2':
+                if col == '3' or col == '2' or col == '4':
                     self.map_data[i][j] = '0'
 
-        if self.obstacle is not None or self.can_pick_obstacle():
-            for i in range(self.obstacle.top, self.obstacle.down + 1):
-                for j in range(self.obstacle.left, self.obstacle.right + 1):
-                    self.map_data[i][j] = '4'
+        if self.obstacles is not None:
+            for obstacle in self.obstacles:
+                for i in range(obstacle.top, obstacle.down + 1):
+                    for j in range(obstacle.left, obstacle.right + 1):
+                        self.map_data[i][j] = '4'
+                
 
     def is_valid_move(self, position):
         row, col = position
