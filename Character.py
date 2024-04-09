@@ -18,6 +18,7 @@ class Character:
         self.move_delay = 1000
         self.last_move_time = 0
         self.visible_cells = None
+        self.obstacles = []
         self.obstacle = None
         self.has_append_move = False
         self.color = None
@@ -41,13 +42,15 @@ class Character:
     def reset_map_data(self):
         for i, row in enumerate(self.map_data):
             for j, col in enumerate(row):
-                if col == '3' or col == '2':
+                if col == '3' or col == '2' or col == '4':
                     self.map_data[i][j] = '0'
 
-        if self.obstacle is not None or self.can_pick_obstacle():
-            for i in range(self.obstacle.top, self.obstacle.down + 1):
-                for j in range(self.obstacle.left, self.obstacle.right + 1):
-                    self.map_data[i][j] = '4'
+        if self.obstacles is not None:
+            for obstacle in self.obstacles:
+                for i in range(obstacle.top, obstacle.down + 1):
+                    for j in range(obstacle.left, obstacle.right + 1):
+                        self.map_data[i][j] = '4'
+                
 
     def is_valid_move(self, position):
         row, col = position
@@ -199,7 +202,7 @@ class Character:
         for new_x in range(left_limit, right_limit):
             for new_y in range(top_limit, bottom_limit):
                 color = self.win.get_at((new_y * self.tile_size, new_x * self.tile_size))
-                if not (new_x == x and new_y == y) and color != (COLOR_WALL[0], COLOR_WALL[1], COLOR_WALL[2], 255) and color != (COLOR_OBS[0], COLOR_OBS[1], COLOR_OBS[2], 255):
+                if not (new_x == x and new_y == y) and color != (COLOR_WALL[0], COLOR_WALL[1], COLOR_WALL[2], 255) and color != (COLOR_OBS[0], COLOR_OBS[1], COLOR_OBS[2], 255) and color != (COLOR_HIDER[0], COLOR_HIDER[1], COLOR_HIDER[2], 255) and color != (COLOR_SEEKER[0], COLOR_SEEKER[1], COLOR_SEEKER[2], 255):
                     if self.has_line_of_sight((x, y), (new_x, new_y)):
                         self.visible_cells.append((new_x, new_y))
 
@@ -215,7 +218,7 @@ class Character:
         for point in points:
             x, y = point
             color = self.win.get_at((y * self.tile_size, x * self.tile_size))
-            if color == (COLOR_WALL[0], COLOR_WALL[1], COLOR_WALL[2], 255) or color == (COLOR_HIDER[0], COLOR_HIDER[1], COLOR_HIDER[2], 255) or color == (COLOR_SEEKER[0], COLOR_SEEKER[1], COLOR_SEEKER[2], 255):  # If the point is a wall, return False
+            if color == (COLOR_WALL[0], COLOR_WALL[1], COLOR_WALL[2], 255) or color == (COLOR_HIDER[0], COLOR_HIDER[1], COLOR_HIDER[2], 255) or color == (COLOR_SEEKER[0], COLOR_SEEKER[1], COLOR_SEEKER[2], 255) or color == (COLOR_OBS[0], COLOR_OBS[1], COLOR_OBS[2], 255):  # If the point is a wall, return False
                 return False
         return True
     
@@ -288,7 +291,7 @@ class Character:
     def heuristic(self, cell1, cell2):
         x1, y1 = cell1
         x2, y2 = cell2
-        return abs(x1 - x2) + abs(y1 - y2)
+        return math.sqrt((x1 - x2)**2 + (y1 - y2)**2)
     
     def find_path(self, start, goal):
         open_set = set()

@@ -132,21 +132,10 @@ def movement(num_hiders, filename):
                                 
         for obs in obstacles:
             obs.draw()
-            if seeker.obstacle is None:
-                seeker.set_obstacle(obs)
-                seeker.reset_map_data()
-                seeker.remove_obstacle()
-            
-            if seeker.can_pick_obstacle():
-                key = pygame.key.get_pressed()
-                if key[pygame.K_g]:
-                    seeker.set_obstacle(obs)
-                if key[pygame.K_h]:
-                    seeker.remove_obstacle()
-            else:
-                seeker.remove_obstacle()
+            if obs not in seeker.obstacles:
+                seeker.obstacles.append(obs)
 
-        # seeker.check_target_location_is_walkable()
+        seeker.reset_map_data()
 
 
         if game_started == True:

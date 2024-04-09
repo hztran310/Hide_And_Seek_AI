@@ -146,25 +146,17 @@ def run_level3():
             
         for obs in obstacles:
             obs.draw()
-            if seeker.obstacle is None:
-                seeker.set_obstacle(obs)
-                seeker.reset_map_data()
-                seeker.remove_obstacle()
+            if obs not in seeker.obstacles:
+                seeker.obstacles.append(obs)
             
-            if [hider.obstacle for hider in hiders] == [None for i in range(num_hiders)]:
+            if obs not in [hider.obstacles for hider in hiders]:
                 for hider in hiders:
-                    hider.set_obstacle(obs)
-                    hider.reset_map_data()
-                    hider.remove_obstacle()
-            
-            if seeker.can_pick_obstacle():
-                key = pygame.key.get_pressed()
-                if key[pygame.K_g]:
-                    seeker.set_obstacle(obs)
-                if key[pygame.K_h]:
-                    seeker.remove_obstacle()
-            else:
-                seeker.remove_obstacle()
+                    hider.obstacles.append(obs)
+
+        seeker.reset_map_data()
+        for hider in hiders:
+            hider.reset_map_data()
+        
         
         if game_started == True:
             if current == 0:
