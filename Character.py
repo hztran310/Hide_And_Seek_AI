@@ -45,7 +45,7 @@ class Character:
                 if col == '3' or col == '2' or col == '4':
                     self.map_data[i][j] = '0'
 
-        if self.obstacles is not None:
+        if self.obstacles != []:
             for obstacle in self.obstacles:
                 for i in range(obstacle.top, obstacle.down + 1):
                     for j in range(obstacle.left, obstacle.right + 1):
@@ -338,13 +338,13 @@ class Character:
                 break
         return path[::-1]
     
-    def check_target_location_is_walkable(self):
-        if self.target_location is not None:
-            if (0 <= self.target_location[0] < len(self.map_data) and 
-                0 <= self.target_location[1] < len(self.map_data[self.target_location[0]]) and 
-                (self.map_data[self.target_location[0]][self.target_location[1]] == '1' or 
-                 self.map_data[self.target_location[0]][self.target_location[1]] == '4')):
-                self.target_location = None
+    # def check_target_location_is_walkable(self):
+    #     if self.target_location is not None:
+    #         if (0 <= self.target_location[0] < len(self.map_data) and 
+    #             0 <= self.target_location[1] < len(self.map_data[self.target_location[0]]) and 
+    #             (self.map_data[self.target_location[0]][self.target_location[1]] == '1' or 
+    #              self.map_data[self.target_location[0]][self.target_location[1]] == '4')):
+    #             self.target_location = None
     
 class Seeker(Character):
     def __init__(self, map, windows):
@@ -354,6 +354,7 @@ class Seeker(Character):
         self.move_count = 0
         self.target_location = None
         self.hider_location = None
+        self.previous_move = None
     
     def found_hider(self, hiders, num_hiders, announces):
         for i in range(num_hiders):
@@ -418,6 +419,7 @@ class Seeker(Character):
                     if path:
                         next_cell = path[0]
                 direction = self.move_to_neighbor(next_cell)
+                self.previous_move = direction
 
                 # Call the appropriate movement method based on the direction
                 if direction == 'Up':
@@ -481,7 +483,11 @@ class Hider(Character):
         return announce_pos
     
     def distance(self, p1, p2):
-        return len(self.find_path(p1, p2))
+        path = self.find_path(p1, p2)
+        if path is not None:
+            return len(path)
+        else:
+            return 0  # or some other value that indicates no path was found
     
     def find_farthest_location(self, point):
         max_distance = float('-inf')

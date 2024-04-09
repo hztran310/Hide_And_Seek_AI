@@ -6,6 +6,7 @@ import random
 from Obstacle import Obstacle
 from Button import ImageButton
 import os
+import copy
 
 #Create button instance
 start_button = ImageButton(start_img, 680, 250)
@@ -23,6 +24,8 @@ def run_level4():
     
     # Create the map
     m = MAP('Map/Map0.txt', win)
+    seeker_map_data = copy.deepcopy(m.map_data)
+    hider_map_data = copy.deepcopy(m.map_data)
     
     num_hiders = 0
     
@@ -37,9 +40,11 @@ def run_level4():
     # Create the characters
     seeker = Seeker(m, win)
     seeker.color = COLOR_SEEKER
+    seeker.map_data = seeker_map_data
     # Many hiders
     hiders = [Hider(m, win) for i in range(num_hiders)]
     for hider in hiders:
+        hider.map_data = hider_map_data
         hider.color = COLOR_HIDER
         
     # Set the initial positions of the characters
@@ -83,6 +88,8 @@ def run_level4():
     for hider in hiders:
         hider.time_limit = 100
 
+    seeker.reset_map_data()
+    
     while running:
         clock.tick(FPS)
 
@@ -111,25 +118,6 @@ def run_level4():
                     running = False
                     back_to_main_menu = True
         
-
-        if announce is not None and not pre_start:
-            if current == 0:
-                if (seeker.target_location is not None and new_announcement == True) or seeker.hider_location is None or seeker.target_location is None:
-                    closest_distance = float('inf') 
-                    closest_location = None  
-                    for cell in announce:
-                        if distance((seeker.row, seeker.col), cell) < closest_distance:
-                            closest_distance = distance((seeker.row, seeker.col), cell)
-                            closest_location = cell
-                    if closest_location is not None:
-                        seeker.set_target_location(closest_location)
-                    new_announcement = False                    
-            else:
-                hider = hiders[current - 1]
-                if hider.target_location is None:
-                    target = hider.find_farthest_location((hider.row, hider.col))
-                    hider.set_target_location(target)
-
         for obs in obstacles:
             obs.draw()
             
@@ -138,15 +126,56 @@ def run_level4():
 
         for hider in hiders:
             hider.reset_map_data()
+
+        if seeker.can_pick_obstacle() and seeker.obstacle is None:
+            for obs in obstacles:
+                for direction in [(0, -1), (-1, 0), (0, 1), (1, 0), (-1, -1), (-1, 1), (1, -1), (1, 1)]:
+                    row = seeker.row + direction[0]
+                    col = seeker.col + direction[1]
+                    if obs.get_obstacle((row, col)) is not None:
+                        seeker.obstacles.append(obs)
+                        seeker.set_obstacle(obs)
+                        seeker.reset_map_data()
+                        break
+
+        if announce is not None and not pre_start:
+            if current == 0:
+                if seeker.obstacle is not None:
+                    if seeker.previous_move is not None:
+                        if seeker.previous_move == 'Up':
+                            seeker.move_obstacle('Down')
+                        elif seeker.previous_move == 'Down':
+                            seeker.move_obstacle('Up')
+                        elif seeker.previous_move == 'Left':
+                            seeker.move_obstacle('Right')
+                        elif seeker.previous_move == 'Right':
+                            seeker.move_obstacle('Left')
+                        seeker.previous_move = None
+                        seeker.remove_obstacle()
+                else:
+                    if (seeker.target_location is not None and new_announcement == True) or seeker.hider_location is None or seeker.target_location is None:
+                        closest_distance = float('inf') 
+                        closest_location = None  
+                        for cell in announce:
+                            if distance((seeker.row, seeker.col), cell) < closest_distance:
+                                closest_distance = distance((seeker.row, seeker.col), cell)
+                                closest_location = cell
+                        if closest_location is not None:
+                            seeker.set_target_location(closest_location)
+                        new_announcement = False                    
+            else:
+                hider = hiders[current - 1]
+                if hider.target_location is None:
+                    target = hider.find_farthest_location((hider.row, hider.col))
+                    hider.set_target_location(target)
         
-    
+
         if game_started == True:
             if pre_start:
                 hider = hiders[current]
                 if not hider.can_pick_obstacle() and hider.obstacle is None:
                     hider.go_to_obstacle()
                     hider.move_towards_target()
-                    pygame.time.wait(100)
                 elif hider.can_pick_obstacle():
                     for direction in [(0, -1), (-1, 0), (0, 1), (1, 0), (-1, -1), (-1, 1), (1, -1), (1, 1)]:
                         row = hider.row + direction[0]
@@ -157,7 +186,6 @@ def run_level4():
                                 break
                     
                     hider.move_obstacle_to_entrance()
-                    pygame.time.wait(100)
                 else:
                     hider.remove_obstacle()
                     hider.time_limit = 0
@@ -169,6 +197,8 @@ def run_level4():
                     current = 0
                 if all(hider.time_limit == 0 for hider in hiders):
                     pre_start = False
+                
+
             else:
                 # Normal game phase: both the hider and seeker can move
                 if current == 0:
@@ -189,9 +219,8 @@ def run_level4():
                             current_update = True
                             pygame.time.wait(100)
                             
-                    
-        seeker.character_vision(3)
-            
+        
+        seeker.character_vision(3)            
         seeker.draw_character_vision()
         
         for hider in hiders:
