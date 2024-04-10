@@ -456,6 +456,7 @@ class Hider(Character):
         self.move_direction = []
         self.new_announce = False
         self.previous_path = []
+        self.immediate_past = []
         self.seeker_location = None
     
     def set_position(self, initial_hider_position):
@@ -486,14 +487,12 @@ class Hider(Character):
         pygame.draw.rect(self.win, COLOR_ANNOUNCE, (announce_pos[1] * self.tile_size, announce_pos[0] * self.tile_size, self.tile_size, self.tile_size))        
         return announce_pos
     
-    def distance(self, p1, p2):
-        path = self.find_path(p1, p2)
-        if path is not None:
-            return len(path)
-        else:
-            return 0  # or some other value that indicates no path was found
+    def distance(self, cell1, cell2):
+        x1, y1 = cell1
+        x2, y2 = cell2
+        return math.sqrt((x1 - x2)**2 + (y1 - y2)**2)
     
-    def find_farthest_location(self):
+    def find_farthest_location(self, point):
         max_distance = float('-inf')
         farthest_location = None
 
@@ -507,7 +506,7 @@ class Hider(Character):
             for j in range(start_col, end_col):
                 if self.map_data[i][j] == '1' or self.map_data[i][j] == '4':
                     continue
-                distance = self.distance((i, j), self.announce_location_position)
+                distance = self.distance((i, j), point)
                 if distance > max_distance:
                     max_distance = distance
                     farthest_location = (i, j)
@@ -521,7 +520,7 @@ class Hider(Character):
                     new_j = (j + len(self.map_data[0])) % len(self.map_data[0])
                     if self.map_data[new_i][new_j] == '1' or self.map_data[new_i][new_j] == '4':
                         continue
-                    distance = self.distance((new_i, new_j), self.announce_location_position)
+                    distance = self.distance((new_i, new_j), point)
                     if distance > max_distance:
                         max_distance = distance
                         farthest_location = (new_i, new_j)
@@ -529,8 +528,8 @@ class Hider(Character):
         return farthest_location
 
 
-    def heuristic(self, current, goal, seeker_position):
-        return self.distance(current, goal) - self.distance(current, seeker_position)
+    def heuristic(self, current, goal):
+        return self.distance(current, goal)
                 
     def find_path(self, start, goal):
         row, col = goal
@@ -551,9 +550,9 @@ class Hider(Character):
 
         g_score = {start: 0}
         if self.seeker_location is not None:
-            f_score = {start: self.heuristic(start, goal, self.seeker_location)}
+            f_score = {start: self.heuristic(start, goal) + self.heuristic(start, self.seeker_location)}
         else:
-            f_score = {start: self.heuristic(start, goal, (self.row, self.col))}
+            f_score = {start: self.heuristic(start, goal)}
 
         open_set.add(start)
 
@@ -565,27 +564,23 @@ class Hider(Character):
 
             open_set.remove(current)
             closed_set.add(current)
-
+            
             for neighbor in self.neighbors(current):
-                tentative_g_score = g_score[current] + self.cost(current, neighbor)
+                    tentative_g_score = g_score[current] + self.cost(current, neighbor)
 
-                if neighbor in self.previous_path:
-                    tentative_g_score += 1000  # Adjust the penalty value as needed
+                    if neighbor in self.previous_path:
+                        tentative_g_score += 1000  # Adjust the penalty value as needed
 
-                if neighbor in closed_set and tentative_g_score >= g_score.get(neighbor, float('inf')):
-                    continue
+                    if neighbor in closed_set and tentative_g_score >= g_score.get(neighbor, float('inf')):
+                        continue
 
-                if neighbor not in open_set or tentative_g_score < g_score.get(neighbor, float('inf')):
-                    came_from[neighbor] = current
-                    g_score[neighbor] = tentative_g_score
-                    if self.seeker_location is not None:
-                        f_score[neighbor] = tentative_g_score + self.heuristic(neighbor, goal, self.seeker_location)
-                    else:
-                        f_score[neighbor] = tentative_g_score + self.heuristic(neighbor, goal, (self.row, self.col))
+                    if neighbor not in open_set or tentative_g_score < g_score.get(neighbor, float('inf')):
+                        came_from[neighbor] = current
+                        g_score[neighbor] = tentative_g_score
+                        f_score[neighbor] = tentative_g_score + self.heuristic(neighbor, goal)
 
-                    if neighbor not in open_set:
-                        open_set.add(neighbor)
-
+                        if neighbor not in open_set and neighbor not in self.immediate_past:
+                            open_set.add(neighbor)
         return None
     
     def move_towards_target(self):
@@ -593,10 +588,9 @@ class Hider(Character):
             # Use the A* algorithm to find the shortest path to the target
             path = self.find_path((self.row, self.col), self.target_location)
             
-            full_path = path.copy()
-
             # If a path was found, move to the next cell in the path
             if path:
+                full_path = path.copy()
                 next_cell = path[0]
                 if (next_cell[0] == self.row and next_cell[1] == self.col):
                     path.pop(0)
@@ -623,6 +617,10 @@ class Hider(Character):
                 elif direction == 'Down_Right':
                     self.move_down_right()
             
+            self.immediate_past.append((self.row, self.col))
+            if len(self.immediate_past) > 5:
+                self.immediate_past.pop(0)
+                
             if self.row == self.target_location[0] and self.col == self.target_location[1]:
                 self.previous_path = full_path
                 self.target_location = None
@@ -661,7 +659,7 @@ class Hider(Character):
         return self.target_location is None or self.target_location == (self.row, self.col)
     
     def utility(self, seeker_row, seeker_col):
-        return self.heuristic((self.row, self.col), (seeker_row, seeker_col), (seeker_row, seeker_col))
+        return abs(self.row - seeker_row) + abs(self.col - seeker_col)
     
     def get_children(self):
         children = []
@@ -670,14 +668,21 @@ class Hider(Character):
         return children
      
     def move_when_saw_seeker(self, seeker_row, seeker_col):
-        _, best_move = self.minimax(5, float('-inf'), float('inf'), True, seeker_row, seeker_col)
-        if best_move == (self.row, self.col):
+        # If the seeker is adjacent, move to the furthest possible location
+        if abs(self.row - seeker_row) <= 1 and abs(self.col - seeker_col) <= 1:
+            possible_moves = self.get_children()
+            best_move = max(possible_moves, key=lambda move: self.distance(move, (seeker_row, seeker_col)))
+        else:
+            _, best_move = self.minimax(5, float('-inf'), float('inf'), True, seeker_row, seeker_col)
             possible_moves = self.get_children()
             if (self.row, self.col) in possible_moves:  # check if the current position is in the list
                 possible_moves.remove((self.row, self.col))  # remove the current position
             if possible_moves:  # check if there are other moves available
                 # Choose the move that is farthest from the seeker
                 best_move = max(possible_moves, key=lambda move: self.distance(move, (seeker_row, seeker_col)))
+            else:
+                # If there are no other moves, stay in the current position
+                best_move = (self.row, self.col)
         return best_move
     
     def go_to_obstacle(self):

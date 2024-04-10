@@ -123,7 +123,7 @@ def run_level3():
                 hider = hiders[current - 1]
                 if (hider.target_location is None) or new_announcement == True:
                     hider.target_location = None
-                    target = hider.find_farthest_location()
+                    target = hider.find_farthest_location(hider.announce_location_position)
                     hider.set_target_location(target)
         
         if current == 0:
@@ -178,13 +178,10 @@ def run_level3():
                         hider.move_towards_target()
                         current_update = True
                         pygame.time.wait(100)
-        # if current == 0:     
+
         seeker.character_vision(3) 
         seeker.draw_character_vision()
-        # else:
-            # hider = hiders[current - 1]
-            # hider.character_vision(2)
-            # hider.draw_character_vision()
+
         for hider in hiders:
             hider.character_vision(2)
             hider.draw_character_vision()
@@ -212,7 +209,7 @@ def run_level3():
                 win.blit(SCORE_TEXT, [680,0])
                 if tmp_num_hiders == 0:
                     game_over = True
-                    win.fill(COLOR_FLOOR, pygame.Rect(0, 0, TEXT_HIDER_FOUND.get_width(), TEXT_HIDER_FOUND.get_height()))  # Fill the area with white color
+                    win.fill(COLOR_WINDOW, pygame.Rect(680, 0, TEXT_HIDER_FOUND.get_width(), TEXT_HIDER_FOUND.get_height()))  # Fill the area with white color
                     pygame.display.update()
                     SCORE_TEXT = SCORE_FONT.render(f'Score: {seeker.score}', True, (0, 0, 0))  # Create a text surface with the score
                     win.blit(SCORE_TEXT, [680,0])

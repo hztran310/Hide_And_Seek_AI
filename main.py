@@ -22,7 +22,7 @@ def main_menu():
     level1_button = Button((249, 235, 170), 50, 150, 200, 80, 'Level 1')
     level2_button = Button((241, 238, 220), 50, 300, 200, 80, 'Level 2')
     level3_button = Button((73, 159, 164), 50, 450, 200, 80, 'Level 3')
-    level4_button = Button((73, 159, 164), 50, 600, 200, 80, 'Level 4')
+    level4_button = Button((90, 169, 107), 50, 600, 200, 80, 'Level 4')
     title = pygame.image.load('image/title.png')
     
     # Set up the loop
