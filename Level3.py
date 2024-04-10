@@ -142,7 +142,9 @@ def run_level3():
                 for cell in hider.visible_cells:
                     if seeker.row == cell[0] and seeker.col == cell[1]:
                         hider.target_location = None
+                        hider.seeker_location = (seeker.row, seeker.col)
                         hider.set_target_location(hider.move_when_saw_seeker(seeker.row, seeker.col))
+                        hider.seeker_location = None
             
         for obs in obstacles:
             obs.draw()
@@ -180,9 +182,9 @@ def run_level3():
         seeker.character_vision(3) 
         seeker.draw_character_vision()
         # else:
-        #     hider = hiders[current - 1]
-        #     hider.character_vision(2)
-        #     hider.draw_character_vision()
+            # hider = hiders[current - 1]
+            # hider.character_vision(2)
+            # hider.draw_character_vision()
         for hider in hiders:
             hider.character_vision(2)
             hider.draw_character_vision()
