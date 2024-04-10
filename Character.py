@@ -355,7 +355,7 @@ class Seeker(Character):
         self.move_count = 0
         self.target_location = None
         self.hider_location = None
-        self.previous_move = None
+        self.previous_move = []
     
     def found_hider(self, hiders, num_hiders, announces):
         for i in range(num_hiders):
@@ -420,7 +420,9 @@ class Seeker(Character):
                     if path:
                         next_cell = path[0]
                 direction = self.move_to_neighbor(next_cell)
-                self.previous_move = direction
+                self.previous_move.append(direction)
+                if len(self.previous_move) > 2:
+                    self.previous_move.pop(0)
 
                 # Call the appropriate movement method based on the direction
                 if direction == 'Up':
@@ -444,6 +446,26 @@ class Seeker(Character):
                 if self.target_location in announce:
                     announce.remove(self.target_location)
                 self.target_location = None
+
+    def move_obstacle_out_of_entrance(self):
+        if self.previous_move != []:
+            direction = self.previous_move.pop(0)
+            if direction == 'Up':
+                self.move_obstacle('Down')
+            elif direction == 'Down':
+                self.move_obstacle('Up')
+            elif direction == 'Left':
+                self.move_obstacle('Right')
+            elif direction == 'Right':
+                self.move_obstacle('Left')
+            elif direction == 'Up_Left':
+                self.move_obstacle('Down')
+            elif direction == 'Up_Right':
+                self.move_obstacle('Down')
+            elif direction == 'Down_Left':
+                self.move_obstacle('Up')
+            elif direction == 'Down_Right':
+                self.move_obstacle('Up')
 
         
 class Hider(Character):

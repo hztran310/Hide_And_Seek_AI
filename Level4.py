@@ -86,9 +86,11 @@ def run_level4():
     pre_start = True
 
     for hider in hiders:
-        hider.time_limit = 100
+        hider.time_limit = 30
 
     seeker.reset_map_data()
+
+    first_obstacle = True
     
     while running:
         clock.tick(FPS)
@@ -127,7 +129,7 @@ def run_level4():
         for hider in hiders:
             hider.reset_map_data()
 
-        if seeker.can_pick_obstacle() and seeker.obstacle is None:
+        if seeker.can_pick_obstacle() and seeker.obstacle is None and first_obstacle:
             for obs in obstacles:
                 for direction in [(0, -1), (-1, 0), (0, 1), (1, 0), (-1, -1), (-1, 1), (1, -1), (1, 1)]:
                     row = seeker.row + direction[0]
@@ -136,30 +138,17 @@ def run_level4():
                         seeker.obstacles.append(obs)
                         seeker.set_obstacle(obs)
                         seeker.reset_map_data()
+                        first_obstacle = False
                         break
+
 
         if announce is not None and not pre_start:
             if current == 0:
                 if seeker.obstacle is not None:
-                    if seeker.previous_move is not None:
-                        if seeker.previous_move == 'Up':
-                            seeker.move_obstacle('Down')
-                        elif seeker.previous_move == 'Down':
-                            seeker.move_obstacle('Up')
-                        elif seeker.previous_move == 'Left':
-                            seeker.move_obstacle('Right')
-                        elif seeker.previous_move == 'Right':
-                            seeker.move_obstacle('Left')
-                        elif seeker.previous_move == 'Up_Left':
-                            seeker.move_obstacle('Down')
-                        elif seeker.previous_move == 'Up_Right':
-                            seeker.move_obstacle('Down')
-                        elif seeker.previous_move == 'Down_Left':
-                            seeker.move_obstacle('Up')
-                        elif seeker.previous_move == 'Down_Right':
-                            seeker.move_obstacle('Up')
+                    seeker.move_obstacle_out_of_entrance()
+                    if seeker.previous_move == []:
+                        seeker.remove_obstacle()
                         
-                    seeker.remove_obstacle()
                 else:
                     if (seeker.target_location is not None and new_announcement == True) or seeker.hider_location is None or seeker.target_location is None:
                         closest_distance = float('inf') 
@@ -176,6 +165,26 @@ def run_level4():
                 if hider.target_location is None:
                     target = hider.find_farthest_location((hider.row, hider.col))
                     hider.set_target_location(target)
+
+        if current == 0:
+            seeker.character_vision(3)
+            if seeker.visible_cells is not None:
+                for cell in seeker.visible_cells:
+                    for hider in hiders:
+                        if hider.row == cell[0] and hider.col == cell[1]:
+                            seeker.target_location = None
+                            seeker.set_target_location((hider.row, hider.col))
+                            seeker.hider_location = (hider.row, hider.col)
+        else:
+            hider = hiders[current - 1]
+            hider.character_vision(2)
+            if hider.visible_cells is not None:
+                for cell in hider.visible_cells:
+                    if seeker.row == cell[0] and seeker.col == cell[1]:
+                        hider.target_location = None
+                        hider.seeker_location = (seeker.row, seeker.col)
+                        hider.set_target_location(hider.move_when_saw_seeker(seeker.row, seeker.col))
+                        hider.seeker_location = None
         
 
         if game_started == True:
@@ -194,9 +203,9 @@ def run_level4():
                                 break
                     
                     hider.move_obstacle_to_entrance()
-                else:
-                    hider.remove_obstacle()
-                    hider.time_limit = 0
+                    if hider.move_direction == []:
+                        hider.remove_obstacle()
+                        hider.time_limit = 0
 
                 hider.reset_map_data()
 
@@ -226,7 +235,9 @@ def run_level4():
                             hider.move_towards_target()
                             current_update = True
                             pygame.time.wait(100)
-                            
+        
+        for hider in hiders:
+            hider.reset_map_data()
         
         seeker.character_vision(3)            
         seeker.draw_character_vision()
