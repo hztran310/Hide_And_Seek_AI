@@ -5,6 +5,7 @@ import numpy as np
 import random
 from queue import PriorityQueue
 from setting import *
+import math
 
 class Character:
     def __init__(self, character_type, map, windows):
@@ -290,7 +291,7 @@ class Character:
     def heuristic(self, cell1, cell2):
         x1, y1 = cell1
         x2, y2 = cell2
-        return abs(x1 - x2) + abs(y1 - y2)
+        return math.sqrt((x1 - x2)**2 + (y1 - y2)**2)
     
     def find_path(self, start, goal):
         open_set = set()
@@ -453,6 +454,9 @@ class Hider(Character):
         self.is_announcing = False
         self.target_location = None
         self.move_direction = []
+        self.new_announce = False
+        self.previous_path = []
+        self.seeker_location = None
     
     def set_position(self, initial_hider_position):
         for i, row in enumerate(self.map_data):
@@ -489,27 +493,107 @@ class Hider(Character):
         else:
             return 0  # or some other value that indicates no path was found
     
-    def find_farthest_location(self, point):
+    def find_farthest_location(self):
         max_distance = float('-inf')
         farthest_location = None
+
+        # Define the search area
         start_row = max(0, self.row - 10)
-        end_row = min(len(self.map_data), self.row + 11)
+        end_row = min(len(self.map_data), self.row + 10)
         start_col = max(0, self.col - 10)
-        end_col = min(len(self.map_data[0]), self.col + 11)
+        end_col = min(len(self.map_data[0]), self.col + 10)
+
         for i in range(start_row, end_row):
             for j in range(start_col, end_col):
-                if self.map_data[i][j] != '0':
+                if self.map_data[i][j] == '1' or self.map_data[i][j] == '4':
                     continue
-                distance_to_target = self.distance(point, (i, j))
-                if distance_to_target > max_distance:
-                    max_distance = distance_to_target
+                distance = self.distance((i, j), self.announce_location_position)
+                if distance > max_distance:
+                    max_distance = distance
                     farthest_location = (i, j)
+
+        # If no farthest location was found within the search area, wrap around the map
+        if farthest_location is None:
+            for i in range(start_row, end_row):
+                for j in range(start_col, end_col):
+                    # Calculate the new positions by wrapping around the map
+                    new_i = (i + len(self.map_data)) % len(self.map_data)
+                    new_j = (j + len(self.map_data[0])) % len(self.map_data[0])
+                    if self.map_data[new_i][new_j] == '1' or self.map_data[new_i][new_j] == '4':
+                        continue
+                    distance = self.distance((new_i, new_j), self.announce_location_position)
+                    if distance > max_distance:
+                        max_distance = distance
+                        farthest_location = (new_i, new_j)
+
         return farthest_location
-        
+
+
+    def heuristic(self, current, goal, seeker_position):
+        return self.distance(current, goal) - self.distance(current, seeker_position)
+                
+    def find_path(self, start, goal):
+        row, col = goal
+        if self.map_data[row][col] == '1' or self.map_data[row][col] == '4':
+            start_row = max(0, row - 3)
+            end_row = min(len(self.map_data), row + 3)
+            start_col = max(0, col - 3)
+            end_col = min(len(self.map_data[0]), col + 3)
+            for i in range(start_row, end_row):
+                for j in range(start_col, end_col):
+                    if self.map_data[i][j] == '0':
+                        goal = (i, j)
+                        break
+                
+        open_set = set()
+        closed_set = set()
+        came_from = {}
+
+        g_score = {start: 0}
+        if self.seeker_location is not None:
+            f_score = {start: self.heuristic(start, goal, self.seeker_location)}
+        else:
+            f_score = {start: self.heuristic(start, goal, (self.row, self.col))}
+
+        open_set.add(start)
+
+        while open_set:
+            current = min(open_set, key=lambda node: f_score[node])
+
+            if current == goal:
+                return self.reconstruct_path(came_from, goal)
+
+            open_set.remove(current)
+            closed_set.add(current)
+
+            for neighbor in self.neighbors(current):
+                tentative_g_score = g_score[current] + self.cost(current, neighbor)
+
+                if neighbor in self.previous_path:
+                    tentative_g_score += 1000  # Adjust the penalty value as needed
+
+                if neighbor in closed_set and tentative_g_score >= g_score.get(neighbor, float('inf')):
+                    continue
+
+                if neighbor not in open_set or tentative_g_score < g_score.get(neighbor, float('inf')):
+                    came_from[neighbor] = current
+                    g_score[neighbor] = tentative_g_score
+                    if self.seeker_location is not None:
+                        f_score[neighbor] = tentative_g_score + self.heuristic(neighbor, goal, self.seeker_location)
+                    else:
+                        f_score[neighbor] = tentative_g_score + self.heuristic(neighbor, goal, (self.row, self.col))
+
+                    if neighbor not in open_set:
+                        open_set.add(neighbor)
+
+        return None
+    
     def move_towards_target(self):
         if self.target_location is not None:
             # Use the A* algorithm to find the shortest path to the target
             path = self.find_path((self.row, self.col), self.target_location)
+            
+            full_path = path.copy()
 
             # If a path was found, move to the next cell in the path
             if path:
@@ -540,52 +624,62 @@ class Hider(Character):
                     self.move_down_right()
             
             if self.row == self.target_location[0] and self.col == self.target_location[1]:
+                self.previous_path = full_path
                 self.target_location = None
         self.time_limit -= 1
-                
-    def move_when_saw_seeker(self, seeker_row, seeker_col):
-        start_row = 0
-        end_row = len(self.map_data)
-        start_col = 0
-        end_col = len(self.map_data[0])
-        
-        if self.row < seeker_row:
-            start_row = max(0, self.row - 10)
-            end_row = min(len(self.map_data), self.row - 1)
-        elif self.row > seeker_row:
-            start_row = min(len(self.map_data), self.row + 1)
-            end_row = min(len(self.map_data), self.row + 11)
-        
-        if self.col < seeker_col:
-            start_col = max(0, self.col - 10)
-            end_col = min(len(self.map_data[0]), self.col - 1)
-        elif self.col > seeker_col:
-            start_col = min(len(self.map_data[0]), self.col + 1)
-            end_col = min(len(self.map_data[0]), self.col + 11)
-        
-        max_distance = float('-inf')
-        farthest_location = None
-        
-        for i in range(start_row, end_row):
-            for j in range(start_col, end_col):
-                if self.map_data[i][j] != '0' or (i == seeker_row and j == seeker_col):
-                    continue
-                distance_to_target = self.distance((seeker_row, seeker_col), (i, j))
-                if distance_to_target > max_distance:
-                    max_distance = distance_to_target
-                    farthest_location = (i, j)
-        
-        if farthest_location is not None:
-            return farthest_location
-        else:
-            while True:
-                randomList = [(self.row - 1, self.col), (self.row + 1, self.col), (self.row, self.col - 1), (self.row, self.col + 1), (self.row - 1, self.col - 1), (self.row - 1, self.col + 1), (self.row + 1, self.col - 1), (self.row + 1, self.col + 1)]
-                random_location = random.choice(randomList)
-                if self.is_valid_move(random_location) and random_location != (seeker_row, seeker_col):
-                    return random_location
-                else:
-                    randomList.remove(random_location)
+    
+    def minimax(self, depth, alpha, beta, maximizingPlayer, seeker_row, seeker_col):
+        if depth == 0 or self.is_terminal_state():
+            return self.utility(seeker_row, seeker_col), (self.row, self.col)
 
+        if maximizingPlayer:
+            maxEval = float('-inf')
+            best_move = None
+            for child in self.get_children():
+                eval, move = self.minimax(depth - 1, alpha, beta, False, child[0], child[1])
+                if eval > maxEval:
+                    maxEval = eval
+                    best_move = move
+                alpha = max(alpha, eval)
+                if beta <= alpha:
+                    break
+            return maxEval, best_move
+        else:
+            minEval = float('inf')
+            best_move = None
+            for child in self.get_children():
+                eval, move = self.minimax(depth - 1, alpha, beta, True, child[0], child[1])
+                if eval < minEval:
+                    minEval = eval
+                    best_move = move
+                beta = min(beta, eval)
+                if beta <= alpha:
+                    break
+            return minEval, best_move
+    
+    def is_terminal_state(self):
+        return self.target_location is None or self.target_location == (self.row, self.col)
+    
+    def utility(self, seeker_row, seeker_col):
+        return self.heuristic((self.row, self.col), (seeker_row, seeker_col), (seeker_row, seeker_col))
+    
+    def get_children(self):
+        children = []
+        for neighbor in self.neighbors((self.row, self.col)):
+            children.append(neighbor)
+        return children
+     
+    def move_when_saw_seeker(self, seeker_row, seeker_col):
+        _, best_move = self.minimax(5, float('-inf'), float('inf'), True, seeker_row, seeker_col)
+        if best_move == (self.row, self.col):
+            possible_moves = self.get_children()
+            if (self.row, self.col) in possible_moves:  # check if the current position is in the list
+                possible_moves.remove((self.row, self.col))  # remove the current position
+            if possible_moves:  # check if there are other moves available
+                # Choose the move that is farthest from the seeker
+                best_move = max(possible_moves, key=lambda move: self.distance(move, (seeker_row, seeker_col)))
+        return best_move
+    
     def go_to_obstacle(self):
         closest_obstacle_adjacent = None
         min_distance = float('inf')
@@ -623,6 +717,3 @@ class Hider(Character):
                 self.move_obstacle('Left')
 
         self.time_limit -= 1
-            
-
-        
