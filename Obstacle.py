@@ -24,6 +24,13 @@ class Obstacle:
         for y in range(top, down, self.tile_size):
             for x in range(left, right, self.tile_size):
                 pygame.draw.rect(self.win, COLOR_OBS, (x, y, self.tile_size, self.tile_size))
+
+    def get_obstacle(self, position):
+        row, col = position
+        if row >= self.top and row <= self.down and col >= self.left and col <= self.right:
+            return self
+        else:
+            return None
     
     def remove_draw(self):
         top = self.top * self.tile_size

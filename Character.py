@@ -22,6 +22,7 @@ class Character:
         self.obstacle = None
         self.has_append_move = False
         self.color = None
+        self.time_limit = 0
         
     def set_position(self):
         for i, row in enumerate(self.map_data):
@@ -45,7 +46,7 @@ class Character:
                 if col == '3' or col == '2' or col == '4':
                     self.map_data[i][j] = '0'
 
-        if self.obstacles is not None:
+        if self.obstacles != []:
             for obstacle in self.obstacles:
                 for i in range(obstacle.top, obstacle.down + 1):
                     for j in range(obstacle.left, obstacle.right + 1):
@@ -158,35 +159,34 @@ class Character:
             self.obstacle.character_color = None
             self.obstacle = None
 
-    def move_obstacle(self):
-        if (pygame.time.get_ticks() - self.last_move_time) > self.move_delay:
-            key = pygame.key.get_pressed()
-            if key[pygame.K_UP]:
+    
+    def move_obstacle(self, direction):
+        if self.obstacle is not None:
+            if direction == 'Up':
                 if self.row == 0 or self.map_data[self.row - 1][self.col] == '1':
                     return
                 self.obstacle.move_up()
                 self.reset_map_data()
                 self.move_up()
-            elif key[pygame.K_DOWN]:
+            elif direction == 'Down':
                 if self.row == len(self.map_data) - 1 or self.map_data[self.row + 1][self.col] == '1':
                     return
                 self.obstacle.move_down()
                 self.reset_map_data()
                 self.move_down()
-            elif key[pygame.K_LEFT]:
+            elif direction == 'Left':
                 if self.col == 0 or self.map_data[self.row][self.col - 1] == '1':
                     return
                 self.obstacle.move_left()
                 self.reset_map_data()
                 self.move_left()
-            elif key[pygame.K_RIGHT]:
+            elif direction == 'Right':
                 if self.col == len(self.map_data[0]) - 1 or self.map_data[self.row][self.col + 1] == '1':
                     return
                 self.obstacle.move_right()
                 self.reset_map_data()
                 self.move_right()
             
-            self.last_move_time = pygame.time.get_ticks()
     
     def character_vision(self, vision_range):
         grid_size = len(self.map_data)
@@ -339,13 +339,13 @@ class Character:
                 break
         return path[::-1]
     
-    def check_target_location_is_walkable(self):
-        if self.target_location is not None:
-            if (0 <= self.target_location[0] < len(self.map_data) and 
-                0 <= self.target_location[1] < len(self.map_data[self.target_location[0]]) and 
-                (self.map_data[self.target_location[0]][self.target_location[1]] == '1' or 
-                 self.map_data[self.target_location[0]][self.target_location[1]] == '4')):
-                self.target_location = None
+    # def check_target_location_is_walkable(self):
+    #     if self.target_location is not None:
+    #         if (0 <= self.target_location[0] < len(self.map_data) and 
+    #             0 <= self.target_location[1] < len(self.map_data[self.target_location[0]]) and 
+    #             (self.map_data[self.target_location[0]][self.target_location[1]] == '1' or 
+    #              self.map_data[self.target_location[0]][self.target_location[1]] == '4')):
+    #             self.target_location = None
     
 class Seeker(Character):
     def __init__(self, map, windows):
@@ -355,6 +355,7 @@ class Seeker(Character):
         self.move_count = 0
         self.target_location = None
         self.hider_location = None
+        self.previous_move = None
     
     def found_hider(self, hiders, num_hiders, announces):
         for i in range(num_hiders):
@@ -419,6 +420,7 @@ class Seeker(Character):
                     if path:
                         next_cell = path[0]
                 direction = self.move_to_neighbor(next_cell)
+                self.previous_move = direction
 
                 # Call the appropriate movement method based on the direction
                 if direction == 'Up':
@@ -451,6 +453,7 @@ class Hider(Character):
         self.announce_location_position = []
         self.is_announcing = False
         self.target_location = None
+        self.move_direction = []
         self.new_announce = False
         self.previous_path = []
         self.seeker_location = None
@@ -484,7 +487,11 @@ class Hider(Character):
         return announce_pos
     
     def distance(self, p1, p2):
-        return math.sqrt((p1[0] - p2[0])**2 + (p1[1] - p2[1])**2)
+        path = self.find_path(p1, p2)
+        if path is not None:
+            return len(path)
+        else:
+            return 0  # or some other value that indicates no path was found
     
     def find_farthest_location(self):
         max_distance = float('-inf')
@@ -596,6 +603,7 @@ class Hider(Character):
                     if path:
                         next_cell = path[0]
                 direction = self.move_to_neighbor(next_cell)
+                self.move_direction.append(direction)
 
                 # Call the appropriate movement method based on the direction
                 if direction == 'Up':
@@ -618,6 +626,7 @@ class Hider(Character):
             if self.row == self.target_location[0] and self.col == self.target_location[1]:
                 self.previous_path = full_path
                 self.target_location = None
+        self.time_limit -= 1
     
     def minimax(self, depth, alpha, beta, maximizingPlayer, seeker_row, seeker_col):
         if depth == 0 or self.is_terminal_state():
@@ -670,3 +679,41 @@ class Hider(Character):
                 # Choose the move that is farthest from the seeker
                 best_move = max(possible_moves, key=lambda move: self.distance(move, (seeker_row, seeker_col)))
         return best_move
+    
+    def go_to_obstacle(self):
+        closest_obstacle_adjacent = None
+        min_distance = float('inf')
+    
+        for i in range(len(self.map_data)):
+            for j in range(len(self.map_data[0])):
+                if self.map_data[i][j] != '4':
+                    continue
+    
+                # Check the cells adjacent to the obstacle
+                for di, dj in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
+                    ni, nj = i + di, j + dj
+                    if (0 <= ni < len(self.map_data)) and (0 <= nj < len(self.map_data[0])) and self.map_data[ni][nj] != '4':
+                        distance = ((self.row - ni) ** 2 + (self.col - nj) ** 2) ** 0.5
+                        if distance < min_distance:
+                            min_distance = distance
+                            closest_obstacle_adjacent = (ni, nj)
+
+        if (self.row, self.col) == closest_obstacle_adjacent:
+            self.target_location = None
+        else:
+            if closest_obstacle_adjacent is not None:
+                self.set_target_location(closest_obstacle_adjacent)
+
+    def move_obstacle_to_entrance(self):
+        if self.move_direction:
+            direction = self.move_direction.pop(0)
+            if direction == 'Up':
+                self.move_obstacle('Down')
+            elif direction == 'Down':
+                self.move_obstacle('Up')
+            elif direction == 'Left':
+                self.move_obstacle('Right')
+            elif direction == 'Right':
+                self.move_obstacle('Left')
+
+        self.time_limit -= 1
