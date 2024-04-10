@@ -146,6 +146,7 @@ def run_level4():
             if current == 0:
                 if seeker.obstacle is not None:
                     seeker.move_obstacle_out_of_entrance()
+                    seeker.target_location = None
                     if seeker.previous_move == []:
                         seeker.remove_obstacle()
                         
@@ -193,6 +194,7 @@ def run_level4():
                 if not hider.can_pick_obstacle() and hider.obstacle is None:
                     hider.go_to_obstacle()
                     hider.move_towards_target()
+                    pygame.time.wait(100)
                 elif hider.can_pick_obstacle():
                     for direction in [(0, -1), (-1, 0), (0, 1), (1, 0), (-1, -1), (-1, 1), (1, -1), (1, 1)]:
                         row = hider.row + direction[0]
@@ -238,8 +240,8 @@ def run_level4():
         
         for hider in hiders:
             hider.reset_map_data()
-        
-        seeker.character_vision(3)            
+
+        seeker.character_vision(3)
         seeker.draw_character_vision()
         
         for hider in hiders:

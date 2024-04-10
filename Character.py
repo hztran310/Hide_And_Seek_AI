@@ -466,7 +466,6 @@ class Seeker(Character):
                 self.move_obstacle('Up')
             elif direction == 'Down_Right':
                 self.move_obstacle('Up')
-
         
 class Hider(Character):
     def __init__(self, map, windows):
